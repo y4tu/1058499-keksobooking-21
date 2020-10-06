@@ -30,9 +30,13 @@ const PIN_OFFSET_Y = 70;
 
 const map = document.querySelector(`.map`);
 const similarPins = map.querySelector(`.map__pins`);
+const mapFilter = map.querySelector(`.map__filters-container`);
 const mapPinTemplate = document.querySelector(`#pin`)
   .content
   .querySelector(`.map__pin`);
+const cardTemplate = document.querySelector(`#card`)
+  .content
+  .querySelector(`.map__card`);
 
 const getRandomInRange = (min, max) => {
   min = Math.ceil(min);
@@ -58,7 +62,7 @@ const generateAds = (number) => {
   for (let i = 0; i < number; i++) {
     ads.push({
       author: {
-        avatar: `img/avatars/user0${(i + 1)}.png`
+        avatar: `img/avatars/user0${i + 1}.png`
       },
       offer: {
         title: getRandomArrayElement(TITLES),
@@ -96,6 +100,45 @@ const createPin = (ad) => {
   return pinElement;
 };
 
+const createCard = (ad) => {
+  console.log(ad);
+
+  const cardElement = cardTemplate.cloneNode(true);
+  const image = cardElement.querySelector(`.popup__avatar`);
+  const title = cardElement.querySelector(`.popup__title`);
+  const address = cardElement.querySelector(`.popup__text--address`);
+  const offerPrice = cardElement.querySelector(`.popup__text--price`);
+  const type = cardElement.querySelector(`.popup__type`);
+  const capacity = cardElement.querySelector(`.popup__text--capacity`);
+  const time = cardElement.querySelector(`.popup__text--time`);
+  const desc = cardElement.querySelector(`.popup__description`);
+  const featureItem = cardElement.querySelector(`.popup__feature`);
+  const currentFeatures = getFeature();
+  const photos = cardElement.querySelector(`.popup__photos`);
+  const photoItem = cardElement.querySelector(`.popup__photo`);
+  const currentPhotos = getPhoto();
+
+  image.src = ad.author.avatar;
+  title.textContent = ad.offer.title;
+  address.textContent = ad.offer.address;
+  offerPrice.textContent = ad.offer.price + `₽/ночь`;
+  type.textContent = ad.offer.type;
+  capacity.textContent = `${ad.offer.rooms} комнаты для ${ad.offer.guests} гостей`;
+  time.textContent = `Заезд после ${ad.offer.checkin}, выезд до ${ad.offer.checkout}`;
+  desc.textContent = ad.offer.description;
+
+  for (let i = 0; i < currentFeatures.length; i++) {
+    featureItem.textContent = currentFeatures[i];
+  }
+
+  for (let j = 0; j < currentPhotos.length; j++) {
+    photoItem.src = currentPhotos[j];
+  }
+
+  return cardElement;
+};
+
+
 const renderPins = (array) => {
   const fragment = document.createDocumentFragment();
 
@@ -104,5 +147,14 @@ const renderPins = (array) => {
   similarPins.appendChild(fragment);
 };
 
+const renderCard = (item) => {
+  const fragment = document.createDocumentFragment();
+
+  fragment.appendChild(createCard(item));
+
+  map.insertBefore(fragment, mapFilter);
+};
+
 const ads = generateAds(ADS_NUMBER);
 renderPins(ads);
+renderCard(ads[0]);
