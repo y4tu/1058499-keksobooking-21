@@ -101,7 +101,6 @@ const createPin = (ad) => {
 };
 
 const createCard = (ad) => {
-  console.log(ad);
 
   const cardElement = cardTemplate.cloneNode(true);
   const image = cardElement.querySelector(`.popup__avatar`);
