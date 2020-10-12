@@ -111,10 +111,9 @@ const createCard = (ad) => {
   const capacity = cardElement.querySelector(`.popup__text--capacity`);
   const time = cardElement.querySelector(`.popup__text--time`);
   const desc = cardElement.querySelector(`.popup__description`);
-  const featureItem = cardElement.querySelector(`.popup__feature`);
+  const features = cardElement.querySelector(`.popup__features`);
   const currentFeatures = getFeature();
   const photos = cardElement.querySelector(`.popup__photos`);
-  const photoItem = cardElement.querySelector(`.popup__photo`);
   const currentPhotos = getPhoto();
 
   image.src = ad.author.avatar;
@@ -125,13 +124,28 @@ const createCard = (ad) => {
   capacity.textContent = `${ad.offer.rooms} комнаты для ${ad.offer.guests} гостей`;
   time.textContent = `Заезд после ${ad.offer.checkin}, выезд до ${ad.offer.checkout}`;
   desc.textContent = ad.offer.description;
+  features.innerHTML = ``;
+  photos.innerHTML = ``;
 
   for (let i = 0; i < currentFeatures.length; i++) {
-    featureItem.textContent = currentFeatures[i];
+    const feature = document.createElement(`li`);
+
+    feature.classList.add(`popup__feature`);
+    feature.classList.add(`popup__feature--${currentFeatures[i]}`);
+
+    features.append(feature);
   }
 
   for (let j = 0; j < currentPhotos.length; j++) {
-    photoItem.src = currentPhotos[j];
+    const photoItem = document.createElement(`img`);
+
+    photoItem.classList.add(`popup__photo`);
+    photoItem.src = `${currentPhotos[j]}`;
+    photoItem.alt = `Фотография жилья`;
+    photoItem.width = `45`;
+    photoItem.height = `40`;
+
+    photos.append(photoItem);
   }
 
   return cardElement;
