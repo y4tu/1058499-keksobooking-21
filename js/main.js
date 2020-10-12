@@ -23,7 +23,6 @@ const PHOTOS = [
   `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
   `http://o0.github.io/assets/images/tokyo/hotel3.jpg`
 ];
-const RANDOM_ARRAY_MULTIPLIER = 10;
 const PRICE_MULTIPLIER = 10000;
 const PIN_OFFSET_X = 25;
 const PIN_OFFSET_Y = 70;
@@ -45,16 +44,13 @@ const getRandomInRange = (min, max) => {
 };
 
 const getRandomArray = (array) => {
-  return array.slice(0, Math.floor(Math.random() * array.length * RANDOM_ARRAY_MULTIPLIER));
+  return array.slice(0, Math.floor(Math.random() * array.length));
 };
 
 const getRandomArrayElement = (array) => array[Math.floor(Math.random() * array.length)];
 const getLocationX = () => getRandomInRange(MIN_LOCATION_X, MAX_LOCATION_X);
 const getLocationY = () => getRandomInRange(MIN_LOCATION_Y, MAX_LOCATION_Y);
 const getPrice = () => Math.round(Math.random() * PRICE_MULTIPLIER);
-const getDescription = () => getRandomArrayElement(DESCRIPTION);
-const getFeature = () => getRandomArray(FEATURES);
-const getPhoto = () => getRandomArray(PHOTOS);
 
 const generateAds = (number) => {
   const ads = [];
@@ -73,9 +69,9 @@ const generateAds = (number) => {
         guests: getRandomArrayElement(GUESTS),
         checkin: getRandomArrayElement(CHECKIN),
         checkout: getRandomArrayElement(CHECKOUT),
-        features: getFeature(),
-        description: getDescription(),
-        photos: getPhoto(),
+        features: getRandomArray(FEATURES),
+        description: getRandomArrayElement(DESCRIPTION),
+        photos: getRandomArray(PHOTOS),
       },
       location: {
         x: getLocationX(),
@@ -101,51 +97,66 @@ const createPin = (ad) => {
 };
 
 const createCard = (ad) => {
+  const {author, offer} = ad;
+
+  const {avatar} = author;
+  const {
+    title,
+    address,
+    price,
+    type,
+    rooms,
+    guests,
+    checkin,
+    checkout,
+    features,
+    description,
+    photos
+  } = offer;
 
   const cardElement = cardTemplate.cloneNode(true);
-  const image = cardElement.querySelector(`.popup__avatar`);
-  const title = cardElement.querySelector(`.popup__title`);
-  const address = cardElement.querySelector(`.popup__text--address`);
-  const offerPrice = cardElement.querySelector(`.popup__text--price`);
-  const type = cardElement.querySelector(`.popup__type`);
-  const capacity = cardElement.querySelector(`.popup__text--capacity`);
-  const time = cardElement.querySelector(`.popup__text--time`);
-  const desc = cardElement.querySelector(`.popup__description`);
-  const features = cardElement.querySelector(`.popup__features`);
-  const currentFeatures = getFeature();
-  const photos = cardElement.querySelector(`.popup__photos`);
-  const currentPhotos = getPhoto();
+  const imageElement = cardElement.querySelector(`.popup__avatar`);
+  const titleElement = cardElement.querySelector(`.popup__title`);
+  const addressElement = cardElement.querySelector(`.popup__text--address`);
+  const offerPriceElement = cardElement.querySelector(`.popup__text--price`);
+  const typeElement = cardElement.querySelector(`.popup__type`);
+  const typeMap = {
+    palace: `Дворец`,
+    flat: `Квартира`,
+    house: `Дом`,
+    bungalow: `Бунгало`
+  };
+  const typeRus = typeMap[type];
+  const capacityElement = cardElement.querySelector(`.popup__text--capacity`);
+  const timeElement = cardElement.querySelector(`.popup__text--time`);
+  const descElement = cardElement.querySelector(`.popup__description`);
+  const featuresElement = cardElement.querySelector(`.popup__features`);
+  const photosElement = cardElement.querySelector(`.popup__photos`);
+  const photoElement = cardElement.querySelector(`.popup__photo`);
 
-  image.src = ad.author.avatar;
-  title.textContent = ad.offer.title;
-  address.textContent = ad.offer.address;
-  offerPrice.textContent = ad.offer.price + `₽/ночь`;
-  type.textContent = ad.offer.type;
-  capacity.textContent = `${ad.offer.rooms} комнаты для ${ad.offer.guests} гостей`;
-  time.textContent = `Заезд после ${ad.offer.checkin}, выезд до ${ad.offer.checkout}`;
-  desc.textContent = ad.offer.description;
-  features.innerHTML = ``;
-  photos.innerHTML = ``;
+  imageElement.src = avatar;
+  titleElement.textContent = title;
+  addressElement.textContent = address;
+  offerPriceElement.textContent = price + `₽/ночь`;
+  typeElement.textContent = typeRus;
+  capacityElement.textContent = `${rooms} комнаты для ${guests} гостей`;
+  timeElement.textContent = `Заезд после ${checkin}, выезд до ${checkout}`;
+  descElement.textContent = description;
+  featuresElement.innerHTML = ``;
+  photosElement.innerHTML = ``;
 
-  for (let i = 0; i < currentFeatures.length; i++) {
-    const feature = document.createElement(`li`);
+  for (let i = 0; i < features.length; i++) {
+    const featureItem = document.createElement(`li`);
 
-    feature.classList.add(`popup__feature`);
-    feature.classList.add(`popup__feature--${currentFeatures[i]}`);
+    featureItem.classList.add(`popup__feature`, `popup__feature--${features[i]}`);
 
-    features.append(feature);
+    featuresElement.append(featureItem);
   }
 
-  for (let j = 0; j < currentPhotos.length; j++) {
-    const photoItem = document.createElement(`img`);
-
-    photoItem.classList.add(`popup__photo`);
-    photoItem.src = `${currentPhotos[j]}`;
-    photoItem.alt = `Фотография жилья`;
-    photoItem.width = `45`;
-    photoItem.height = `40`;
-
-    photos.append(photoItem);
+  for (let i = 0; i < photos.length; i++) {
+    const photoItem = photoElement.cloneNode();
+    photoItem.src = `${photos[i]}`;
+    photosElement.append(photoItem);
   }
 
   return cardElement;
