@@ -101,7 +101,7 @@ const getPrice = () => Math.round(Math.random() * PRICE_MULTIPLIER);
 
 const toggleAdFormElements = (nodes) => {
   nodes.forEach((node) => {
-    node.disabled = isPageActive;
+    node.disabled = !isPageActive;
   });
 };
 
@@ -114,6 +114,7 @@ const calcAdAddress = () => {
 };
 
 const insertAddress = () => {
+  formInputAddress.disabled = true;
   formInputAddress.value = calcAdAddress();
 };
 
@@ -123,8 +124,8 @@ const activatePage = () => {
   map.classList.remove(`map--faded`);
   adForm.classList.remove(`ad-form--disabled`);
 
-  toggleAdFormElements(adFormElements, false);
-  toggleAdFormElements(mapFiltersControls, false);
+  toggleAdFormElements(adFormElements);
+  toggleAdFormElements(mapFiltersControls);
   insertAddress();
 };
 
@@ -134,8 +135,8 @@ const deActivatePage = () => {
   map.classList.add(`map--faded`);
   adForm.classList.add(`ad-form--disabled`);
 
-  toggleAdFormElements(adFormElements, true);
-  toggleAdFormElements(mapFiltersControls, true);
+  toggleAdFormElements(adFormElements);
+  toggleAdFormElements(mapFiltersControls);
   insertAddress();
 };
 
