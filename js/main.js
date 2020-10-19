@@ -6,8 +6,6 @@ const MIN_LOCATION_X = 0;
 const MAX_LOCATION_X = 1200;
 const MIN_LOCATION_Y = 130;
 const MAX_LOCATION_Y = 630;
-const MAP_PIN_MAIN_LOCATION_X = 570;
-const MAP_PIN_MAIN_LOCATION_Y = 375;
 const TYPES = [`palace`, `flat`, `house`, `bungalow`];
 const ROOMS = [`1`, `2`, `3`, `4`];
 const GUESTS = [`2`, `4`, `6`, `8`];
@@ -26,10 +24,15 @@ const PHOTOS = [
   `http://o0.github.io/assets/images/tokyo/hotel3.jpg`
 ];
 const PRICE_MULTIPLIER = 10000;
+const MAP_PIN_MAIN_X = 570;
+const MAP_PIN_MAIN_Y = 375;
 const PIN_OFFSET_X = 25;
 const PIN_OFFSET_Y = 70;
-const MAIN_PIN_OFFSET_X = 53;
-const MAIN_PIN_OFFSET_Y = 31;
+const MAP_PIN_MAIN_OFFSET_X = 31;
+const MAP_PIN_MAIN_OFFSET_Y = 31;
+const ACTIVE_MAP_PIN_MAIN_OFFSET_Y = 53;
+
+let isPageActive = false;
 
 const typeMap = {
   palace: `Дворец`,
@@ -40,6 +43,7 @@ const typeMap = {
 
 const map = document.querySelector(`.map`);
 const similarPins = map.querySelector(`.map__pins`);
+const mapPinMain = map.querySelector(`.map__pin--main`);
 const mapFilters = map.querySelector(`.map__filters`);
 const mapFiltersControls = mapFilters.querySelectorAll(`.map__filter`);
 const mapFiltersFieldset = mapFilters.querySelector(`.map__features`);
@@ -55,7 +59,7 @@ const adFormInputAddress = adForm.querySelector(`input[name="address"]`);
 const adFormSubmit = adForm.querySelector(`.ad-form__submit`);
 const mapMainPin = map.querySelector(`.map__pin--main`);
 const formInputTitle = adForm.querySelector(`select[name="title"]`);
-const formInputAddress = adForm.querySelector(`select[name="address"]`);
+const formInputAddress = adForm.querySelector(`input[name="address"]`);
 const formInputType = adForm.querySelector(`select[name="type"]`);
 const formInputPrice = adForm.querySelector(`select[name="price"]`);
 const formInputTimeIn = adForm.querySelector(`select[name="timein"]`);
@@ -76,53 +80,73 @@ const getRandomArray = (array) => {
 };
 
 const getRandomArrayElement = (array) => array[Math.floor(Math.random() * array.length)];
+
 const getLocationX = () => getRandomInRange(MIN_LOCATION_X, MAX_LOCATION_X);
+
 const getLocationY = () => getRandomInRange(MIN_LOCATION_Y, MAX_LOCATION_Y);
+
+const getPinMainLocationX = () => {
+  return mapPinMain.style.left;
+};
+
+const getPinMainLocationY = () => {
+  return mapPinMain.style.top;
+};
+
+const PinMainLocationX = getPinMainLocationX().substring(0, 3);
+const PinMainLocationY = getPinMainLocationY().substring(0, 3);
+
+
 const getPrice = () => Math.round(Math.random() * PRICE_MULTIPLIER);
-const disableAdFormElements = () => {
-  adFormElements.forEach((adFormElement) => {
-    adFormElement.disabled = true;
+
+const toggleAdFormElements = (nodes) => {
+  nodes.forEach((node) => {
+    node.disabled = isPageActive;
   });
 };
-const enableAdFormElements = () => {
-  adFormElements.forEach((adFormElement) => {
-    adFormElement.disabled = false;
-  });
+
+const calcAdAddress = () => {
+  if (isPageActive === true) {
+    return `${+PinMainLocationX + MAP_PIN_MAIN_OFFSET_X}, ${+PinMainLocationY + ACTIVE_MAP_PIN_MAIN_OFFSET_Y}`;
+  } else {
+    return `${+PinMainLocationX + MAP_PIN_MAIN_OFFSET_X}, ${+PinMainLocationY + MAP_PIN_MAIN_OFFSET_Y}`;
+  }
 };
-const disableFilters = () => {
-  mapFiltersControls.forEach((mapFiltersControl) => {
-    mapFiltersControl.disabled = true;
-  });
-  mapFiltersFieldset.disabled = true;
+
+const insertAddress = () => {
+  formInputAddress.value = calcAdAddress();
 };
-const enableFilters = () => {
-  mapFiltersControls.forEach((mapFiltersControl) => {
-    mapFiltersControl.disabled = false;
-  });
-  mapFiltersFieldset.disabled = false;
-};
+
 const activatePage = () => {
+  isPageActive = true;
+
   map.classList.remove(`map--faded`);
   adForm.classList.remove(`ad-form--disabled`);
 
-  enableAdFormElements();
-  enableFilters();
+  toggleAdFormElements(adFormElements, false);
+  toggleAdFormElements(mapFiltersControls, false);
+  insertAddress();
 };
-const adAddress = () => {
-  if (map.className !== `map`) {
-    adFormInputAddress.value = `${MAP_PIN_MAIN_LOCATION_X}, ${MAP_PIN_MAIN_LOCATION_Y}`;
-  } else {
-    adFormInputAddress.value = `${MAP_PIN_MAIN_LOCATION_X - MAIN_PIN_OFFSET_X},
-     ${MAP_PIN_MAIN_LOCATION_Y + MAIN_PIN_OFFSET_Y}`;
-  }
+
+const deActivatePage = () => {
+  isPageActive = false;
+
+  map.classList.add(`map--faded`);
+  adForm.classList.add(`ad-form--disabled`);
+
+  toggleAdFormElements(adFormElements, true);
+  toggleAdFormElements(mapFiltersControls, true);
+  insertAddress();
 };
+
 const adFormValidation = () => {
   formInputTitle.addEventListener(`invalid`, () => {
     formInputTitle.addEventListener(`input`, () => {
 
     });
   });
-  formInputRooms.addEventListener(`invalid`, () => {
+  formInputRooms.addEventListener(`invalid`, (evt) => {
+    evt.preventDefault();
     if (housingRoomsOptions.textContent === `1 комната` && housingGuestsOptions.textContent !== `для 1 гостя`) {
       formInputRooms.setCustomValidity(`Количество комнат не соответствует количеству гостей`);
     } else if (housingRoomsOptions.textContent === `2 комнаты` && housingGuestsOptions.textContent !== `для 2 гостей`) {
@@ -136,6 +160,7 @@ const adFormValidation = () => {
     }
   });
 };
+
 const onFormSubmit = () => {
   adFormSubmit.addEventListener(`submit`, () => {
     adFormValidation();
@@ -244,11 +269,13 @@ const createCard = (ad) => {
 };
 
 const renderPins = (array) => {
-  const fragment = document.createDocumentFragment();
+  if (map.classList.contains(`map--faded`)) {
+    const fragment = document.createDocumentFragment();
 
-  array.forEach((item) => fragment.appendChild(createPin(item)));
+    array.forEach((item) => fragment.appendChild(createPin(item)));
 
-  similarPins.appendChild(fragment);
+    similarPins.appendChild(fragment);
+  }
 };
 
 const renderCard = (item) => {
@@ -261,22 +288,21 @@ const renderCard = (item) => {
 
 const ads = generateAds(ADS_NUMBER);
 
-disableAdFormElements();
-disableFilters();
-adAddress();
-onFormSubmit();
-renderPins(ads);
+deActivatePage();
 // renderCard(ads[0]);
 
 mapMainPin.addEventListener(`mousedown`, (evt) => {
   if (evt.button === 0) {
+    renderPins(ads);
     activatePage();
-    adAddress();
+    calcAdAddress();
   }
 });
+
 mapMainPin.addEventListener(`keydown`, (evt) => {
   if (evt.key === `Enter`) {
+    renderPins(ads);
     activatePage();
-    adAddress();
+    calcAdAddress();
   }
 });
