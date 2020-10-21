@@ -68,6 +68,9 @@ const formInputGuests = adForm.querySelector(`select[name="capacity"]`);
 const housingRoomsOptions = formInputRooms.querySelectorAll(`option`);
 const housingGuestsOptions = formInputRooms.querySelectorAll(`option`);
 let mapPins = [];
+const cards = [];
+let cardPopup;
+let popupClose;
 
 const getRandomInRange = (min, max) => {
   min = Math.ceil(min);
@@ -117,6 +120,21 @@ const insertAddress = () => {
   formInputAddress.value = calcAdAddress();
 };
 
+const addPinsListeners = () => {
+  for (let i = 0; i < mapPins.length; i++) {
+    mapPins[i].addEventListener(`click`, () => {
+      if (map.contains(cardPopup) === true) {
+        map.removeChild(cardPopup);
+        renderCard(cards[i]);
+      } else {
+        renderCard(cards[i]);
+      }
+
+      onCardCrossClick();
+    });
+  }
+};
+
 const activatePage = () => {
   isPageActive = true;
 
@@ -126,8 +144,7 @@ const activatePage = () => {
   toggleAdFormElements(adFormElements);
   toggleAdFormElements(mapFiltersControls);
   insertAddress();
-  onPinClick();
-  prepareCards(ads);
+  addPinsListeners();
 };
 
 const deActivatePage = () => {
@@ -285,14 +302,9 @@ const renderPins = (array) => {
   }
 };
 
-const cards = [];
-
 const prepareCards = (ads) => {
   ads.forEach((ad) => cards.push(createCard(ad)));
 };
-
-let cardPopup;
-let popupClose;
 
 const renderCard = (card) => {
   const fragment = document.createDocumentFragment();
@@ -305,31 +317,25 @@ const renderCard = (card) => {
   popupClose = map.querySelector(`.popup__close`);
 };
 
-const onPinClick = () => {
-  for (let i = 0; i < mapPins.length; i++) {
-    mapPins[i].addEventListener(`click`, () => {
-      if (map.contains(cardPopup) === true) {
-        map.removeChild(cardPopup);
-        renderCard(cards[i]);
-      } else {
-        renderCard(cards[i]);
-      }
+const onClickRemoveCard = (evt) => {
+  if (map.contains(cardPopup) === true && evt.target === popupClose) {
+    map.removeChild(cardPopup);
+  }
+};
 
-      onCardCrossClick();
-    });
+const onEscRemoveCard = (evt) => {
+  if (map.contains(cardPopup) === true && evt.key === `Escape`) {
+    map.removeChild(cardPopup);
   }
 };
 
 const onCardCrossClick = () => {
-  cardPopup.addEventListener(`click`, (evt) => {
-    if (map.contains(cardPopup) === true && evt.target === popupClose) {
-      map.removeChild(cardPopup);
-    }
-  });
+  cardPopup.addEventListener(`click`, (evt) => onClickRemoveCard(evt));
 };
 
 const ads = generateAds(ADS_NUMBER);
 
+prepareCards(ads);
 deActivatePage();
 
 mapMainPin.addEventListener(`mousedown`, (evt) => {
@@ -348,8 +354,5 @@ mapMainPin.addEventListener(`keydown`, (evt) => {
   }
 });
 
-document.addEventListener(`keydown`, (evt) => {
-  if (map.contains(cardPopup) === true && evt.key === `Escape`) {
-    map.removeChild(cardPopup);
-  }
-});
+document.addEventListener(`keydown`, (evt) => onEscRemoveCard(evt));
+
