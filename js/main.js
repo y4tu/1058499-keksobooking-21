@@ -24,8 +24,6 @@ const PHOTOS = [
   `http://o0.github.io/assets/images/tokyo/hotel3.jpg`
 ];
 const PRICE_MULTIPLIER = 10000;
-const MAP_PIN_MAIN_X = 570;
-const MAP_PIN_MAIN_Y = 375;
 const PIN_OFFSET_X = 25;
 const PIN_OFFSET_Y = 70;
 const MAP_PIN_MAIN_OFFSET_X = 31;
@@ -45,6 +43,7 @@ const map = document.querySelector(`.map`);
 const similarPins = map.querySelector(`.map__pins`);
 const mapPinMain = map.querySelector(`.map__pin--main`);
 const mapFilters = map.querySelector(`.map__filters`);
+const mapFiltersContainer = map.querySelector(`.map__filters-container`);
 const mapFiltersControls = mapFilters.querySelectorAll(`.map__filter`);
 const mapFiltersFieldset = mapFilters.querySelector(`.map__features`);
 const mapPinTemplate = document.querySelector(`#pin`)
@@ -68,6 +67,7 @@ const formInputRooms = adForm.querySelector(`select[name="rooms"]`);
 const formInputGuests = adForm.querySelector(`select[name="capacity"]`);
 const housingRoomsOptions = formInputRooms.querySelectorAll(`option`);
 const housingGuestsOptions = formInputRooms.querySelectorAll(`option`);
+let mapPins = [];
 
 const getRandomInRange = (min, max) => {
   min = Math.ceil(min);
@@ -95,7 +95,6 @@ const getPinMainLocationY = () => {
 
 const PinMainLocationX = getPinMainLocationX().substring(0, 3);
 const PinMainLocationY = getPinMainLocationY().substring(0, 3);
-
 
 const getPrice = () => Math.round(Math.random() * PRICE_MULTIPLIER);
 
@@ -127,6 +126,8 @@ const activatePage = () => {
   toggleAdFormElements(adFormElements);
   toggleAdFormElements(mapFiltersControls);
   insertAddress();
+  onPinClick();
+  prepareCards(ads);
 };
 
 const deActivatePage = () => {
@@ -172,9 +173,9 @@ const generateAds = (number) => {
   const ads = [];
 
   for (let i = 0; i < number; i++) {
-    ads.push({
+    const data = {
       author: {
-        avatar: `img/avatars/user0${i + 1}.png`
+        avatar: `img/avatars/user0${i + 1}.png`,
       },
       offer: {
         title: getRandomArrayElement(TITLES),
@@ -193,7 +194,8 @@ const generateAds = (number) => {
         x: getLocationX(),
         y: getLocationY()
       }
-    });
+    };
+    ads.push(data);
   }
 
   return ads;
@@ -207,13 +209,17 @@ const createPin = (ad) => {
   image.alt = ad.offer.title;
   pinElement.style = `left: ${getLocationX() - PIN_OFFSET_X}px; top: ${getLocationY() - PIN_OFFSET_Y}px;`;
 
+  mapPins.push(pinElement);
+
   return pinElement;
 };
 
 const createCard = (ad) => {
+
   const {author, offer} = ad;
 
   const {avatar} = author;
+
   const {
     title,
     address,
@@ -225,7 +231,7 @@ const createCard = (ad) => {
     checkout,
     features,
     description,
-    photos
+    photos,
   } = offer;
 
   const cardElement = cardTemplate.cloneNode(true);
@@ -279,21 +285,55 @@ const renderPins = (array) => {
   }
 };
 
-const renderCard = (item) => {
+const cards = [];
+
+const prepareCards = (ads) => {
+  ads.forEach((ad) => cards.push(createCard(ad)));
+};
+
+let cardPopup;
+let popupClose;
+
+const renderCard = (card) => {
   const fragment = document.createDocumentFragment();
 
-  fragment.appendChild(createCard(item));
+  fragment.appendChild(card);
 
-  map.insertBefore(fragment, mapFilters);
+  map.insertBefore(fragment, mapFiltersContainer);
+
+  cardPopup = map.querySelector(`.map__card`);
+  popupClose = map.querySelector(`.popup__close`);
+};
+
+const onPinClick = () => {
+  for (let i = 0; i < mapPins.length; i++) {
+    mapPins[i].addEventListener(`click`, () => {
+      if (map.contains(cardPopup) === true) {
+        map.removeChild(cardPopup);
+        renderCard(cards[i]);
+      } else {
+        renderCard(cards[i]);
+      }
+
+      onCardCrossClick();
+    });
+  }
+};
+
+const onCardCrossClick = () => {
+  cardPopup.addEventListener(`click`, (evt) => {
+    if (evt.target === popupClose) {
+      map.removeChild(cardPopup);
+    }
+  });
 };
 
 const ads = generateAds(ADS_NUMBER);
 
 deActivatePage();
-// renderCard(ads[0]);
 
 mapMainPin.addEventListener(`mousedown`, (evt) => {
-  if (evt.button === 0) {
+  if (evt.button === 0 && isPageActive !== true) {
     renderPins(ads);
     activatePage();
     calcAdAddress();
@@ -301,7 +341,7 @@ mapMainPin.addEventListener(`mousedown`, (evt) => {
 });
 
 mapMainPin.addEventListener(`keydown`, (evt) => {
-  if (evt.key === `Enter`) {
+  if (evt.key === `Enter` && isPageActive !== true) {
     renderPins(ads);
     activatePage();
     calcAdAddress();
