@@ -322,7 +322,7 @@ const onPinClick = () => {
 
 const onCardCrossClick = () => {
   cardPopup.addEventListener(`click`, (evt) => {
-    if (evt.target === popupClose) {
+    if (map.contains(cardPopup) === true && evt.target === popupClose) {
       map.removeChild(cardPopup);
     }
   });
@@ -345,5 +345,11 @@ mapMainPin.addEventListener(`keydown`, (evt) => {
     renderPins(ads);
     activatePage();
     calcAdAddress();
+  }
+});
+
+document.addEventListener(`keydown`, (evt) => {
+  if (map.contains(cardPopup) === true && evt.key === `Escape`) {
+    map.removeChild(cardPopup);
   }
 });
