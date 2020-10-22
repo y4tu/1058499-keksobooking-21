@@ -24,11 +24,9 @@ const PHOTOS = [
   `http://o0.github.io/assets/images/tokyo/hotel3.jpg`
 ];
 const PRICE_MULTIPLIER = 10000;
-const PIN_OFFSET_X = 25;
-const PIN_OFFSET_Y = 70;
-const MAP_PIN_MAIN_OFFSET_X = 31;
-const MAP_PIN_MAIN_OFFSET_Y = 31;
-const ACTIVE_MAP_PIN_MAIN_OFFSET_Y = 53;
+const MAP_PIN_MAIN_OFFSET_X = 65;
+const MAP_PIN_MAIN_OFFSET_Y = 65;
+const TALE = 22;
 
 let isPageActive = false;
 
@@ -67,10 +65,7 @@ const formInputRooms = adForm.querySelector(`select[name="rooms"]`);
 const formInputGuests = adForm.querySelector(`select[name="capacity"]`);
 const housingRoomsOptions = formInputRooms.querySelectorAll(`option`);
 const housingGuestsOptions = formInputRooms.querySelectorAll(`option`);
-let mapPins = [];
-const cards = [];
-let cardPopup;
-let popupClose;
+let cardPopupRef = null;
 
 const getRandomInRange = (min, max) => {
   min = Math.ceil(min);
@@ -88,16 +83,15 @@ const getLocationX = () => getRandomInRange(MIN_LOCATION_X, MAX_LOCATION_X);
 
 const getLocationY = () => getRandomInRange(MIN_LOCATION_Y, MAX_LOCATION_Y);
 
-const getPinMainLocationX = () => {
-  return mapPinMain.style.left;
-};
+const calcAdAddress = () => {
+  const x = Math.round(parseInt(mapPinMain.style.left, 10) + MAP_PIN_MAIN_OFFSET_X / 2);
 
-const getPinMainLocationY = () => {
-  return mapPinMain.style.top;
-};
+  const y = Math.round(isPageActive ?
+    parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2 + TALE :
+    parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2);
 
-const PinMainLocationX = getPinMainLocationX().substring(0, 3);
-const PinMainLocationY = getPinMainLocationY().substring(0, 3);
+  return `${x}, ${y}`;
+};
 
 const getPrice = () => Math.round(Math.random() * PRICE_MULTIPLIER);
 
@@ -107,44 +101,16 @@ const toggleAdFormElements = (nodes) => {
   });
 };
 
-const calcAdAddress = () => {
-  if (isPageActive === true) {
-    return `${+PinMainLocationX + MAP_PIN_MAIN_OFFSET_X}, ${+PinMainLocationY + ACTIVE_MAP_PIN_MAIN_OFFSET_Y}`;
-  } else {
-    return `${+PinMainLocationX + MAP_PIN_MAIN_OFFSET_X}, ${+PinMainLocationY + MAP_PIN_MAIN_OFFSET_Y}`;
-  }
-};
-
-const insertAddress = () => {
-  formInputAddress.disabled = true;
-  formInputAddress.value = calcAdAddress();
-};
-
-const addPinsListeners = () => {
-  for (let i = 0; i < mapPins.length; i++) {
-    mapPins[i].addEventListener(`click`, () => {
-      if (map.contains(cardPopup) === true) {
-        map.removeChild(cardPopup);
-        renderCard(cards[i]);
-      } else {
-        renderCard(cards[i]);
-      }
-
-      onCardCrossClick();
-    });
-  }
-};
-
 const activatePage = () => {
   isPageActive = true;
 
   map.classList.remove(`map--faded`);
   adForm.classList.remove(`ad-form--disabled`);
 
+  formInputAddress.value = calcAdAddress();
+
   toggleAdFormElements(adFormElements);
   toggleAdFormElements(mapFiltersControls);
-  insertAddress();
-  addPinsListeners();
 };
 
 const deActivatePage = () => {
@@ -153,9 +119,10 @@ const deActivatePage = () => {
   map.classList.add(`map--faded`);
   adForm.classList.add(`ad-form--disabled`);
 
+  formInputAddress.value = calcAdAddress();
+
   toggleAdFormElements(adFormElements);
   toggleAdFormElements(mapFiltersControls);
-  insertAddress();
 };
 
 const adFormValidation = () => {
@@ -184,6 +151,20 @@ const onFormSubmit = () => {
   adFormSubmit.addEventListener(`submit`, () => {
     adFormValidation();
   });
+};
+
+const removeCard = () => {
+  if (cardPopupRef) {
+    map.removeChild(cardPopupRef);
+    cardPopupRef = null;
+    document.removeEventListener(`keydown`, onEscKeydownRemoveCard);
+  }
+};
+
+const onEscKeydownRemoveCard = (evt) => {
+  if (evt.key === `Escape`) {
+    removeCard();
+  }
 };
 
 const generateAds = (number) => {
@@ -224,9 +205,24 @@ const createPin = (ad) => {
 
   image.src = ad.author.avatar;
   image.alt = ad.offer.title;
-  pinElement.style = `left: ${getLocationX() - PIN_OFFSET_X}px; top: ${getLocationY() - PIN_OFFSET_Y}px;`;
+  pinElement.style = `left: ${ad.location.x}px; top: ${ad.location.y}px;`;
 
-  mapPins.push(pinElement);
+  const addCardToPin = () => {
+
+    removeCard();
+
+    return createCard(ad);
+  };
+
+  pinElement.addEventListener(`click`, () => {
+    map.insertBefore(addCardToPin(), mapFiltersContainer);
+  });
+
+  pinElement.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Enter`) {
+      map.insertBefore(addCardToPin(), mapFiltersContainer);
+    }
+  });
 
   return pinElement;
 };
@@ -263,6 +259,7 @@ const createCard = (ad) => {
   const featuresElement = cardElement.querySelector(`.popup__features`);
   const photosElement = cardElement.querySelector(`.popup__photos`);
   const photoElement = cardElement.querySelector(`.popup__photo`);
+  const closeElement = cardElement.querySelector(`.popup__close`);
 
   imageElement.src = avatar;
   titleElement.textContent = title;
@@ -289,6 +286,11 @@ const createCard = (ad) => {
     photosElement.append(photoItem);
   }
 
+  closeElement.addEventListener(`click`, removeCard);
+  document.addEventListener(`keydown`, onEscKeydownRemoveCard);
+
+  cardPopupRef = cardElement;
+
   return cardElement;
 };
 
@@ -302,40 +304,8 @@ const renderPins = (array) => {
   }
 };
 
-const prepareCards = (ads) => {
-  ads.forEach((ad) => cards.push(createCard(ad)));
-};
-
-const renderCard = (card) => {
-  const fragment = document.createDocumentFragment();
-
-  fragment.appendChild(card);
-
-  map.insertBefore(fragment, mapFiltersContainer);
-
-  cardPopup = map.querySelector(`.map__card`);
-  popupClose = map.querySelector(`.popup__close`);
-};
-
-const onClickRemoveCard = (evt) => {
-  if (map.contains(cardPopup) === true && evt.target === popupClose) {
-    map.removeChild(cardPopup);
-  }
-};
-
-const onEscRemoveCard = (evt) => {
-  if (map.contains(cardPopup) === true && evt.key === `Escape`) {
-    map.removeChild(cardPopup);
-  }
-};
-
-const onCardCrossClick = () => {
-  cardPopup.addEventListener(`click`, (evt) => onClickRemoveCard(evt));
-};
-
 const ads = generateAds(ADS_NUMBER);
 
-prepareCards(ads);
 deActivatePage();
 
 mapMainPin.addEventListener(`mousedown`, (evt) => {
@@ -353,6 +323,3 @@ mapMainPin.addEventListener(`keydown`, (evt) => {
     calcAdAddress();
   }
 });
-
-document.addEventListener(`keydown`, (evt) => onEscRemoveCard(evt));
-
