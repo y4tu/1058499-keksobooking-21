@@ -24,13 +24,9 @@ const PHOTOS = [
   `http://o0.github.io/assets/images/tokyo/hotel3.jpg`
 ];
 const PRICE_MULTIPLIER = 10000;
-const MAP_PIN_MAIN_X = 570;
-const MAP_PIN_MAIN_Y = 375;
-const PIN_OFFSET_X = 25;
-const PIN_OFFSET_Y = 70;
-const MAP_PIN_MAIN_OFFSET_X = 31;
-const MAP_PIN_MAIN_OFFSET_Y = 31;
-const ACTIVE_MAP_PIN_MAIN_OFFSET_Y = 53;
+const MAP_PIN_MAIN_OFFSET_X = 65;
+const MAP_PIN_MAIN_OFFSET_Y = 65;
+const TALE = 22;
 
 let isPageActive = false;
 
@@ -45,6 +41,7 @@ const map = document.querySelector(`.map`);
 const similarPins = map.querySelector(`.map__pins`);
 const mapPinMain = map.querySelector(`.map__pin--main`);
 const mapFilters = map.querySelector(`.map__filters`);
+const mapFiltersContainer = map.querySelector(`.map__filters-container`);
 const mapFiltersControls = mapFilters.querySelectorAll(`.map__filter`);
 const mapFiltersFieldset = mapFilters.querySelector(`.map__features`);
 const mapPinTemplate = document.querySelector(`#pin`)
@@ -68,6 +65,7 @@ const formInputRooms = adForm.querySelector(`select[name="rooms"]`);
 const formInputGuests = adForm.querySelector(`select[name="capacity"]`);
 const housingRoomsOptions = formInputRooms.querySelectorAll(`option`);
 const housingGuestsOptions = formInputRooms.querySelectorAll(`option`);
+let cardPopupRef = null;
 
 const getRandomInRange = (min, max) => {
   min = Math.ceil(min);
@@ -85,17 +83,15 @@ const getLocationX = () => getRandomInRange(MIN_LOCATION_X, MAX_LOCATION_X);
 
 const getLocationY = () => getRandomInRange(MIN_LOCATION_Y, MAX_LOCATION_Y);
 
-const getPinMainLocationX = () => {
-  return mapPinMain.style.left;
+const calcAdAddress = () => {
+  const x = Math.round(parseInt(mapPinMain.style.left, 10) + MAP_PIN_MAIN_OFFSET_X / 2);
+
+  const y = Math.round(isPageActive ?
+    parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2 + TALE :
+    parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2);
+
+  return `${x}, ${y}`;
 };
-
-const getPinMainLocationY = () => {
-  return mapPinMain.style.top;
-};
-
-const PinMainLocationX = getPinMainLocationX().substring(0, 3);
-const PinMainLocationY = getPinMainLocationY().substring(0, 3);
-
 
 const getPrice = () => Math.round(Math.random() * PRICE_MULTIPLIER);
 
@@ -105,28 +101,16 @@ const toggleAdFormElements = (nodes) => {
   });
 };
 
-const calcAdAddress = () => {
-  if (isPageActive === true) {
-    return `${+PinMainLocationX + MAP_PIN_MAIN_OFFSET_X}, ${+PinMainLocationY + ACTIVE_MAP_PIN_MAIN_OFFSET_Y}`;
-  } else {
-    return `${+PinMainLocationX + MAP_PIN_MAIN_OFFSET_X}, ${+PinMainLocationY + MAP_PIN_MAIN_OFFSET_Y}`;
-  }
-};
-
-const insertAddress = () => {
-  formInputAddress.disabled = true;
-  formInputAddress.value = calcAdAddress();
-};
-
 const activatePage = () => {
   isPageActive = true;
 
   map.classList.remove(`map--faded`);
   adForm.classList.remove(`ad-form--disabled`);
 
+  formInputAddress.value = calcAdAddress();
+
   toggleAdFormElements(adFormElements);
   toggleAdFormElements(mapFiltersControls);
-  insertAddress();
 };
 
 const deActivatePage = () => {
@@ -135,9 +119,10 @@ const deActivatePage = () => {
   map.classList.add(`map--faded`);
   adForm.classList.add(`ad-form--disabled`);
 
+  formInputAddress.value = calcAdAddress();
+
   toggleAdFormElements(adFormElements);
   toggleAdFormElements(mapFiltersControls);
-  insertAddress();
 };
 
 const adFormValidation = () => {
@@ -168,13 +153,27 @@ const onFormSubmit = () => {
   });
 };
 
+const removeCard = () => {
+  if (cardPopupRef) {
+    map.removeChild(cardPopupRef);
+    cardPopupRef = null;
+    document.removeEventListener(`keydown`, onEscKeydownRemoveCard);
+  }
+};
+
+const onEscKeydownRemoveCard = (evt) => {
+  if (evt.key === `Escape`) {
+    removeCard();
+  }
+};
+
 const generateAds = (number) => {
   const ads = [];
 
   for (let i = 0; i < number; i++) {
-    ads.push({
+    const data = {
       author: {
-        avatar: `img/avatars/user0${i + 1}.png`
+        avatar: `img/avatars/user0${i + 1}.png`,
       },
       offer: {
         title: getRandomArrayElement(TITLES),
@@ -193,7 +192,8 @@ const generateAds = (number) => {
         x: getLocationX(),
         y: getLocationY()
       }
-    });
+    };
+    ads.push(data);
   }
 
   return ads;
@@ -205,15 +205,34 @@ const createPin = (ad) => {
 
   image.src = ad.author.avatar;
   image.alt = ad.offer.title;
-  pinElement.style = `left: ${getLocationX() - PIN_OFFSET_X}px; top: ${getLocationY() - PIN_OFFSET_Y}px;`;
+  pinElement.style = `left: ${ad.location.x}px; top: ${ad.location.y}px;`;
+
+  const addCardToPin = () => {
+
+    removeCard();
+
+    return createCard(ad);
+  };
+
+  pinElement.addEventListener(`click`, () => {
+    map.insertBefore(addCardToPin(), mapFiltersContainer);
+  });
+
+  pinElement.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Enter`) {
+      map.insertBefore(addCardToPin(), mapFiltersContainer);
+    }
+  });
 
   return pinElement;
 };
 
 const createCard = (ad) => {
+
   const {author, offer} = ad;
 
   const {avatar} = author;
+
   const {
     title,
     address,
@@ -225,7 +244,7 @@ const createCard = (ad) => {
     checkout,
     features,
     description,
-    photos
+    photos,
   } = offer;
 
   const cardElement = cardTemplate.cloneNode(true);
@@ -240,6 +259,7 @@ const createCard = (ad) => {
   const featuresElement = cardElement.querySelector(`.popup__features`);
   const photosElement = cardElement.querySelector(`.popup__photos`);
   const photoElement = cardElement.querySelector(`.popup__photo`);
+  const closeElement = cardElement.querySelector(`.popup__close`);
 
   imageElement.src = avatar;
   titleElement.textContent = title;
@@ -266,6 +286,11 @@ const createCard = (ad) => {
     photosElement.append(photoItem);
   }
 
+  closeElement.addEventListener(`click`, removeCard);
+  document.addEventListener(`keydown`, onEscKeydownRemoveCard);
+
+  cardPopupRef = cardElement;
+
   return cardElement;
 };
 
@@ -279,21 +304,12 @@ const renderPins = (array) => {
   }
 };
 
-const renderCard = (item) => {
-  const fragment = document.createDocumentFragment();
-
-  fragment.appendChild(createCard(item));
-
-  map.insertBefore(fragment, mapFilters);
-};
-
 const ads = generateAds(ADS_NUMBER);
 
 deActivatePage();
-// renderCard(ads[0]);
 
 mapMainPin.addEventListener(`mousedown`, (evt) => {
-  if (evt.button === 0) {
+  if (evt.button === 0 && isPageActive !== true) {
     renderPins(ads);
     activatePage();
     calcAdAddress();
@@ -301,7 +317,7 @@ mapMainPin.addEventListener(`mousedown`, (evt) => {
 });
 
 mapMainPin.addEventListener(`keydown`, (evt) => {
-  if (evt.key === `Enter`) {
+  if (evt.key === `Enter` && isPageActive !== true) {
     renderPins(ads);
     activatePage();
     calcAdAddress();
