@@ -1,6 +1,8 @@
 'use strict';
 
 (() => {
+  const mainMap = document.querySelector(`.map`);
+
   const typeMap = {
     palace: `Дворец`,
     flat: `Квартира`,
@@ -14,9 +16,7 @@
   let cardPopupRef = null;
 
   const createCard = (ad) => {
-
     const {author, offer} = ad;
-
     const {avatar} = author;
 
     const {
@@ -82,7 +82,7 @@
 
   const removeCard = () => {
     if (cardPopupRef) {
-      window.map.mainMap.removeChild(cardPopupRef);
+      mainMap.removeChild(cardPopupRef);
       cardPopupRef = null;
       document.removeEventListener(`keydown`, onEscKeydown);
     }

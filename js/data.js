@@ -1,6 +1,7 @@
 'use strict';
 
 (() => {
+  const ADS_NUMBER = 8;
   const TITLES = [`Шейх`, `Лепс`, `Спарк`, `Ваниш`, `Афродита`, `Дженифер`, `Церцея`, `Бусилия`];
   const TYPES = [`palace`, `flat`, `house`, `bungalow`];
   const ROOMS = [`1`, `2`, `3`, `4`];
@@ -58,7 +59,10 @@
     return ads;
   };
 
+  const ads = generateAds(ADS_NUMBER);
+
   window.data = {
+    ads,
     generateAds,
   };
 })();

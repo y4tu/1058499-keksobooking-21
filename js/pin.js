@@ -1,7 +1,9 @@
 'use strict';
 
 (() => {
-  const mapFiltersContainer = window.map.mainMap.querySelector(`.map__filters-container`);
+  const mainMap = document.querySelector(`.map`);
+  const similarPins = mainMap.querySelector(`.map__pins`);
+  const mapFiltersContainer = mainMap.querySelector(`.map__filters-container`);
   const mapPinTemplate = document.querySelector(`#pin`)
     .content
     .querySelector(`.map__pin`);
@@ -22,19 +24,30 @@
     };
 
     pinElement.addEventListener(`click`, () => {
-      window.map.mainMap.insertBefore(addCardToPin(), mapFiltersContainer);
+      mainMap.insertBefore(addCardToPin(), mapFiltersContainer);
     });
 
     pinElement.addEventListener(`keydown`, (evt) => {
       if (evt.key === `Enter`) {
-        window.map.mainMap.insertBefore(addCardToPin(), mapFiltersContainer);
+        mainMap.insertBefore(addCardToPin(), mapFiltersContainer);
       }
     });
 
     return pinElement;
   };
 
+  const renderPins = (array) => {
+    if (mainMap.classList.contains(`map--faded`)) {
+      const fragment = document.createDocumentFragment();
+
+      array.forEach((item) => fragment.appendChild(window.pin.createPin(item)));
+
+      similarPins.appendChild(fragment);
+    }
+  };
+
   window.pin = {
     createPin,
+    renderPins,
   };
 })();
