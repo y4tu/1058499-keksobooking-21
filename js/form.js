@@ -4,15 +4,17 @@
   const MAP_PIN_MAIN_OFFSET_X = 65;
   const MAP_PIN_MAIN_OFFSET_Y = 65;
   const TALE = 22;
+  const MAX_ROOMS = 100;
+  const MIN_GUESTS = 0;
 
+  const selects = document.querySelectorAll(`select`);
+  const inputs = document.querySelectorAll(`input`);
+  const textarea = document.querySelector(`textarea`);
   const mainMap = document.querySelector(`.map`);
   const mapPinMain = mainMap.querySelector(`.map__pin--main`);
-  const mapFilters = mainMap.querySelector(`.map__filters`);
-  const mapFiltersControls = mapFilters.querySelectorAll(`.map__filter`);
   const adForm = document.querySelector(`.ad-form`);
-  const adFormElements = adForm.querySelectorAll(`fieldset`);
+  // const adFormSubmit = adForm.querySelector(`.ad-form__submit`);
   const formInputAddress = adForm.querySelector(`input[name="address"]`);
-  const adFormSubmit = adForm.querySelector(`.ad-form__submit`);
   const formInputTitle = adForm.querySelector(`input[name="title"]`);
   const formInputType = adForm.querySelector(`#type`);
   const formInputPrice = adForm.querySelector(`#price`);
@@ -21,43 +23,53 @@
   const formInputRooms = adForm.querySelector(`#room_number`);
   const formInputCapacity = adForm.querySelector(`#capacity`);
 
-  let isPageActive = false;
+  const priceMap = {
+    bungalow: 0,
+    flat: 1000,
+    house: 5000,
+    palace: 10000,
+  };
 
   const calcAdAddress = () => {
     const x = Math.round(parseInt(mapPinMain.style.left, 10) + MAP_PIN_MAIN_OFFSET_X / 2);
 
-    const y = Math.round(isPageActive ?
+    const y = Math.round(window.util.isPageActive ?
       parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2 + TALE :
       parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2);
 
     return `${x}, ${y}`;
   };
 
-  const activatePage = () => {
-    isPageActive = true;
+  // const onFormSubmit = () => {
+  //   adFormSubmit.addEventListener(`submit`, () => {
+  //     window.form.adFormValidation();
+  //     deactivatePage();
+  //   });
+  // };
 
-    mainMap.classList.remove(`map--faded`);
+  const enableForm = () => {
     adForm.classList.remove(`ad-form--disabled`);
 
     formInputAddress.value = calcAdAddress();
 
-    window.util.toggleAdFormElements(adFormElements, isPageActive);
-    window.util.toggleAdFormElements(mapFiltersControls, isPageActive);
+    window.util.toggleAdFormElements(selects, window.util.isPageActive);
+    window.util.toggleAdFormElements(inputs, window.util.isPageActive);
+
+    textarea.disabled = !window.util.isPageActive;
   };
 
-  const deActivatePage = () => {
-    isPageActive = false;
-
-    mainMap.classList.add(`map--faded`);
+  const disableForm = () => {
     adForm.classList.add(`ad-form--disabled`);
 
     formInputAddress.value = calcAdAddress();
 
-    window.util.toggleAdFormElements(adFormElements, isPageActive);
-    window.util.toggleAdFormElements(mapFiltersControls, isPageActive);
+    window.util.toggleAdFormElements(selects, window.util.isPageActive);
+    window.util.toggleAdFormElements(inputs, window.util.isPageActive);
+
+    textarea.disabled = !window.util.isPageActive;
   };
 
-  const adFormValidation = () => {
+  const onTitleInput = () => {
     formInputTitle.addEventListener(`input`, () => {
       if (formInputTitle.validity.valueMissing) {
         formInputTitle.setCustomValidity(`Введите заголовок!`);
@@ -71,57 +83,43 @@
 
       formInputTitle.reportValidity();
     });
+  };
 
+  const onPriceInput = () => {
     adForm.addEventListener(`change`, () => {
-      switch (formInputType.value) {
-        case `bungalow`:
-          formInputPrice.min = 0;
-          formInputPrice.placeholder = `0`;
-          break;
-
-        case `flat`:
-          formInputPrice.min = 1000;
-          formInputPrice.placeholder = `1000`;
-          break;
-
-        case `house`:
-          formInputPrice.min = 5000;
-          formInputPrice.placeholder = `5000`;
-          break;
-
-        case `palace`:
-          formInputPrice.min = 10000;
-          formInputPrice.placeholder = `10000`;
-          break;
-      }
+      formInputPrice.min = priceMap[formInputType.value];
+      formInputPrice.placeholder = priceMap[formInputType.value];
     });
+  };
 
-    formInputTimeIn.addEventListener(`change`, () => {
-      if (formInputTimeIn.value === `12:00`) {
-        formInputTimeOut.value = `12:00`;
-      } else if (formInputTimeIn.value === `13:00`) {
-        formInputTimeOut.value = `13:00`;
-      } else if (formInputTimeIn.value === `14:00`) {
-        formInputTimeOut.value = `14:00`;
-      }
-    });
+  const onTimeInput = () => {
+    (() => {
+      formInputTimeIn.addEventListener(`change`, () => {
+        if (formInputTimeIn.value !== formInputTimeOut.value) {
+          formInputTimeOut.value =
+            formInputTimeIn.value;
+        } else if (formInputTimeOut.value !== formInputTimeIn.value) {
+          formInputTimeIn.value = formInputTimeOut.value;
+        }
+      });
+      formInputTimeOut.addEventListener(`change`, () => {
+        if (formInputTimeIn.value !== formInputTimeOut.value) {
+          formInputTimeIn.value =
+            formInputTimeOut.value;
+        } else if (formInputTimeOut.value !== formInputTimeIn.value) {
+          formInputTimeOut.value = formInputTimeIn.value;
+        }
+      });
+    })();
+  };
 
-    formInputTimeOut.addEventListener(`change`, () => {
-      if (formInputTimeOut.value === `12:00`) {
-        formInputTimeIn.value = `12:00`;
-      } else if (formInputTimeOut.value === `13:00`) {
-        formInputTimeIn.value = `13:00`;
-      } else if (formInputTimeOut.value === `14:00`) {
-        formInputTimeIn.value = `14:00`;
-      }
-    });
-
+  const onRoomsInput = () => {
     adForm.addEventListener(`change`, () => {
-      if (+formInputRooms.value === 100 && +formInputCapacity.value !== 0) {
+      if (+formInputRooms.value === MAX_ROOMS && +formInputCapacity.value !== MIN_GUESTS) {
         formInputRooms.setCustomValidity(`Не для гостей`);
-      } else if (+formInputRooms.value !== 100 && +formInputCapacity.value === 0) {
+      } else if (+formInputRooms.value !== MAX_ROOMS && +formInputCapacity.value === MIN_GUESTS) {
         formInputRooms.setCustomValidity(`Слишком мало места`);
-      } else if (+formInputCapacity.value !== 0 && +formInputRooms.value < +formInputCapacity.value) {
+      } else if (+formInputCapacity.value !== MIN_GUESTS && +formInputRooms.value < +formInputCapacity.value) {
         formInputRooms.setCustomValidity(`Слишком мало места`);
       } else {
         formInputRooms.setCustomValidity(``);
@@ -130,20 +128,18 @@
     });
   };
 
-  const onFormSubmit = () => {
-    adFormSubmit.addEventListener(`submit`, () => {
-      adFormValidation();
-      deActivatePage();
-    });
+  const adFormValidation = () => {
+    onTitleInput();
+    onPriceInput();
+    onTimeInput();
+    onRoomsInput();
   };
 
   window.form = {
-    isPageActive,
     calcAdAddress,
-    onFormSubmit,
-    activatePage,
-    deActivatePage,
+    enableForm,
+    disableForm,
+    // onFormSubmit,
     adFormValidation,
   };
-
 })();

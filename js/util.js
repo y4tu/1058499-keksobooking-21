@@ -1,6 +1,12 @@
 'use strict';
 
 (() => {
+  const adForm = document.querySelector(`.ad-form`);
+  const selects = adForm.querySelectorAll(`select`);
+  const inputs = adForm.querySelectorAll(`input`);
+
+  let isPageActive = false;
+
   const getRandomInRange = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -17,14 +23,20 @@
 
   const getPrice = (multiplier) => Math.round(Math.random() * multiplier);
 
-
   const toggleAdFormElements = (nodes, flag) => {
-    nodes.forEach((node) => {
-      node.disabled = !flag;
-    });
+    // nodes.forEach((node) => {
+    //   node.disabled = !flag;
+    // });
+
+    for (let i = 0; i < nodes.length; i++) {
+      nodes[i].disabled = !flag;
+    }
   };
 
   window.util = {
+    isPageActive,
+    selects,
+    inputs,
     getRandomInRange,
     getRandomArray,
     getRandomArrayElement,
