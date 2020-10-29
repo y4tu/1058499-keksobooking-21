@@ -3,6 +3,7 @@
 (() => {
   const mainMap = document.querySelector(`.map`);
   const mapMainPin = mainMap.querySelector(`.map__pin--main`);
+  const formInputAddress = document.querySelector(`input[name="address"]`);
 
   const activatePage = () => {
     window.util.isPageActive = true;
@@ -41,5 +42,8 @@
       window.form.calcAdAddress();
     }
   });
+
+  window.gragAndDrop.moveElement(mapMainPin, mapMainPin);
+
 })();
 

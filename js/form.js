@@ -3,7 +3,7 @@
 (() => {
   const MAP_PIN_MAIN_OFFSET_X = 65;
   const MAP_PIN_MAIN_OFFSET_Y = 65;
-  const TALE = 22;
+  const TAIL = 22;
   const MAX_ROOMS = 100;
   const MIN_GUESTS = 0;
 
@@ -14,8 +14,8 @@
   const mapPinMain = mainMap.querySelector(`.map__pin--main`);
   const adForm = document.querySelector(`.ad-form`);
   // const adFormSubmit = adForm.querySelector(`.ad-form__submit`);
-  const formInputAddress = adForm.querySelector(`input[name="address"]`);
-  const formInputTitle = adForm.querySelector(`input[name="title"]`);
+  const formInputAddress = adForm.querySelector(`#address`);
+  const formInputTitle = adForm.querySelector(`#title`);
   const formInputType = adForm.querySelector(`#type`);
   const formInputPrice = adForm.querySelector(`#price`);
   const formInputTimeIn = adForm.querySelector(`#timein`);
@@ -30,14 +30,14 @@
     palace: 10000,
   };
 
-  const calcAdAddress = () => {
-    const x = Math.round(parseInt(mapPinMain.style.left, 10) + MAP_PIN_MAIN_OFFSET_X / 2);
+  const calcAdAddress = (xCoord, yCoord) => {
+    const x = Math.round(xCoord + MAP_PIN_MAIN_OFFSET_X / 2);
 
     const y = Math.round(window.util.isPageActive ?
-      parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2 + TALE :
-      parseInt(mapPinMain.style.top, 10) + MAP_PIN_MAIN_OFFSET_Y / 2);
+      yCoord + MAP_PIN_MAIN_OFFSET_Y / 2 + TAIL :
+      yCoord + MAP_PIN_MAIN_OFFSET_Y / 2);
 
-    return `${x}, ${y}`;
+    formInputAddress.value = `${x}, ${y}`;
   };
 
   // const onFormSubmit = () => {
@@ -50,7 +50,7 @@
   const enableForm = () => {
     adForm.classList.remove(`ad-form--disabled`);
 
-    formInputAddress.value = calcAdAddress();
+    // calcAdAddress(parseInt(mapPinMain.style.left, 10), parseInt(mapPinMain.style.top, 10));
 
     window.util.toggleAdFormElements(selects, window.util.isPageActive);
     window.util.toggleAdFormElements(inputs, window.util.isPageActive);
@@ -61,7 +61,7 @@
   const disableForm = () => {
     adForm.classList.add(`ad-form--disabled`);
 
-    formInputAddress.value = calcAdAddress();
+    calcAdAddress(parseInt(mapPinMain.style.left, 10), parseInt(mapPinMain.style.top, 10));
 
     window.util.toggleAdFormElements(selects, window.util.isPageActive);
     window.util.toggleAdFormElements(inputs, window.util.isPageActive);
@@ -136,6 +136,10 @@
   };
 
   window.form = {
+    formInputAddress,
+    MAP_PIN_MAIN_OFFSET_X,
+    MAP_PIN_MAIN_OFFSET_Y,
+    TAIL,
     calcAdAddress,
     enableForm,
     disableForm,
