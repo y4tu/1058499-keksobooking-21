@@ -20,17 +20,12 @@
     window.form.disableForm();
   };
 
-  window.form.adFormValidation();
-
-  // window.form.onFormSubmit();
-
   deactivatePage();
 
   mapMainPin.addEventListener(`mousedown`, (evt) => {
     if (evt.button === 0 && window.util.isPageActive !== true) {
       window.pin.renderPins(window.data.ads);
       activatePage();
-      window.form.calcAdAddress();
     }
   });
 
@@ -38,8 +33,9 @@
     if (evt.key === `Enter` && window.util.isPageActive !== true) {
       window.pin.renderPins(window.data.ads);
       activatePage();
-      window.form.calcAdAddress();
     }
   });
+
+  window.gragAndDrop.moveElement(mapMainPin, mapMainPin);
 })();
 
