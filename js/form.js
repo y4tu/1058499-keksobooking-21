@@ -6,6 +6,8 @@
   const TAIL = 22;
   const MAX_ROOMS = 100;
   const MIN_GUESTS = 0;
+  const MIN_TITLE_LENGTH = 30;
+  const MAX_TITLE_LENGTH = 100;
 
   const selects = document.querySelectorAll(`select`);
   const inputs = document.querySelectorAll(`input`);
@@ -13,7 +15,6 @@
   const mainMap = document.querySelector(`.map`);
   const mapPinMain = mainMap.querySelector(`.map__pin--main`);
   const adForm = document.querySelector(`.ad-form`);
-  // const adFormSubmit = adForm.querySelector(`.ad-form__submit`);
   const formInputAddress = adForm.querySelector(`#address`);
   const formInputTitle = adForm.querySelector(`#title`);
   const formInputType = adForm.querySelector(`#type`);
@@ -40,17 +41,8 @@
     formInputAddress.value = `${x}, ${y}`;
   };
 
-  // const onFormSubmit = () => {
-  //   adFormSubmit.addEventListener(`submit`, () => {
-  //     window.form.adFormValidation();
-  //     deactivatePage();
-  //   });
-  // };
-
   const enableForm = () => {
     adForm.classList.remove(`ad-form--disabled`);
-
-    // calcAdAddress(parseInt(mapPinMain.style.left, 10), parseInt(mapPinMain.style.top, 10));
 
     window.util.toggleAdFormElements(selects, window.util.isPageActive);
     window.util.toggleAdFormElements(inputs, window.util.isPageActive);
@@ -69,71 +61,53 @@
     textarea.disabled = !window.util.isPageActive;
   };
 
-  const onTitleInput = () => {
-    formInputTitle.addEventListener(`input`, () => {
-      if (formInputTitle.validity.valueMissing) {
-        formInputTitle.setCustomValidity(`Введите заголовок!`);
-      } else if (formInputTitle.validity.tooShort) {
-        formInputTitle.setCustomValidity(`Введите ещё ${30 - formInputTitle.value.length} символов!`);
-      } else if (formInputTitle.validity.tooLong) {
-        formInputTitle.setCustomValidity(`Слишком длинный заголовок. Удалите ${formInputTitle.value.length - 100} символов!`);
-      } else {
-        formInputTitle.setCustomValidity(``);
-      }
-
-      formInputTitle.reportValidity();
-    });
+  const onTitleInput = (evt) => {
+    if (evt.target.value.length === 0) {
+      formInputTitle.setCustomValidity(`Введите заголовок!`);
+    } else if (evt.target.value.length < MIN_TITLE_LENGTH) {
+      formInputTitle.setCustomValidity(`Не менее ${MIN_TITLE_LENGTH} символов!`);
+    } else if (evt.target.value.length > MAX_TITLE_LENGTH) {
+      formInputTitle.setCustomValidity(`Не более ${MAX_TITLE_LENGTH} символов!`);
+    } else {
+      formInputTitle.setCustomValidity(``);
+    }
   };
 
   const onPriceInput = () => {
-    adForm.addEventListener(`change`, () => {
-      formInputPrice.min = priceMap[formInputType.value];
-      formInputPrice.placeholder = priceMap[formInputType.value];
-    });
+    formInputPrice.min = priceMap[formInputType.value];
+    formInputPrice.placeholder = priceMap[formInputType.value];
+
+    if (formInputPrice.value < +formInputPrice.min || formInputPrice.value > +formInputPrice.max) {
+      formInputPrice.setCustomValidity(`От ${formInputPrice.min} до ${formInputPrice.max}`);
+    } else {
+      formInputPrice.setCustomValidity(``);
+    }
   };
 
-  const onTimeInput = () => {
-    (() => {
-      formInputTimeIn.addEventListener(`change`, () => {
-        if (formInputTimeIn.value !== formInputTimeOut.value) {
-          formInputTimeOut.value =
-            formInputTimeIn.value;
-        } else if (formInputTimeOut.value !== formInputTimeIn.value) {
-          formInputTimeIn.value = formInputTimeOut.value;
-        }
-      });
-      formInputTimeOut.addEventListener(`change`, () => {
-        if (formInputTimeIn.value !== formInputTimeOut.value) {
-          formInputTimeIn.value =
-            formInputTimeOut.value;
-        } else if (formInputTimeOut.value !== formInputTimeIn.value) {
-          formInputTimeOut.value = formInputTimeIn.value;
-        }
-      });
-    })();
+  const onCheckTimeChange = (evt) => {
+    formInputTimeOut.value = evt.target.value;
+    formInputTimeIn.value = evt.target.value;
   };
 
   const onRoomsInput = () => {
-    adForm.addEventListener(`change`, () => {
-      if (+formInputRooms.value === MAX_ROOMS && +formInputCapacity.value !== MIN_GUESTS) {
-        formInputRooms.setCustomValidity(`Не для гостей`);
-      } else if (+formInputRooms.value !== MAX_ROOMS && +formInputCapacity.value === MIN_GUESTS) {
-        formInputRooms.setCustomValidity(`Слишком мало места`);
-      } else if (+formInputCapacity.value !== MIN_GUESTS && +formInputRooms.value < +formInputCapacity.value) {
-        formInputRooms.setCustomValidity(`Слишком мало места`);
-      } else {
-        formInputRooms.setCustomValidity(``);
-      }
-      formInputRooms.reportValidity();
-    });
+    if (+formInputRooms.value === MAX_ROOMS && +formInputCapacity.value !== MIN_GUESTS) {
+      formInputRooms.setCustomValidity(`Не для гостей`);
+    } else if (+formInputRooms.value !== MAX_ROOMS && +formInputCapacity.value === MIN_GUESTS) {
+      formInputRooms.setCustomValidity(`Слишком мало места`);
+    } else if (+formInputCapacity.value !== MIN_GUESTS && +formInputRooms.value < +formInputCapacity.value) {
+      formInputRooms.setCustomValidity(`Слишком мало места`);
+    } else {
+      formInputRooms.setCustomValidity(``);
+    }
+    formInputRooms.reportValidity();
   };
 
-  const adFormValidation = () => {
-    onTitleInput();
-    onPriceInput();
-    onTimeInput();
-    onRoomsInput();
-  };
+  formInputTitle.addEventListener(`change`, onTitleInput);
+  formInputPrice.addEventListener(`change`, onPriceInput);
+  formInputTimeIn.addEventListener(`change`, onCheckTimeChange);
+  formInputTimeOut.addEventListener(`change`, onCheckTimeChange);
+  formInputRooms.addEventListener(`change`, onRoomsInput);
+  formInputCapacity.addEventListener(`change`, onRoomsInput);
 
   window.form = {
     formInputAddress,
@@ -143,7 +117,5 @@
     calcAdAddress,
     enableForm,
     disableForm,
-    // onFormSubmit,
-    adFormValidation,
   };
 })();
