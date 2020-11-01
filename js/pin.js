@@ -1,6 +1,8 @@
 'use strict';
 
 (() => {
+  const MAX_SIMILAR_PINS = 5;
+
   const mainMap = document.querySelector(`.map`);
   const similarPins = mainMap.querySelector(`.map__pins`);
   const mapFiltersContainer = mainMap.querySelector(`.map__filters-container`);
@@ -37,13 +39,13 @@
   };
 
   const renderPins = (array) => {
-    if (mainMap.classList.contains(`map--faded`)) {
-      const fragment = document.createDocumentFragment();
+    const fragment = document.createDocumentFragment();
 
-      array.forEach((item) => fragment.appendChild(window.pin.createPin(item)));
-
-      similarPins.appendChild(fragment);
+    for (let i = 0; i < MAX_SIMILAR_PINS; i++) {
+      fragment.appendChild(window.pin.createPin(window.util.getRandomArrayElement(array)));
     }
+
+    similarPins.appendChild(fragment);
   };
 
   window.pin = {

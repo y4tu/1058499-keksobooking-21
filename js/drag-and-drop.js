@@ -75,7 +75,7 @@
   };
 
 
-  window.gragAndDrop = {
+  window.dragAndDrop = {
     moveElement,
   };
 })();
