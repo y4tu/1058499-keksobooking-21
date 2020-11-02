@@ -37,13 +37,11 @@
   };
 
   const renderPins = (array) => {
-    if (mainMap.classList.contains(`map--faded`)) {
-      const fragment = document.createDocumentFragment();
+    const fragment = document.createDocumentFragment();
 
-      array.forEach((item) => fragment.appendChild(window.pin.createPin(item)));
+    array.forEach((item) => fragment.appendChild(window.pin.createPin(item)));
 
-      similarPins.appendChild(fragment);
-    }
+    similarPins.appendChild(fragment);
   };
 
   window.pin = {

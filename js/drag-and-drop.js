@@ -74,8 +74,7 @@
     targetElement.addEventListener(`mousedown`, onTargetElementMouseMove);
   };
 
-
-  window.gragAndDrop = {
+  window.dragAndDrop = {
     moveElement,
   };
 })();

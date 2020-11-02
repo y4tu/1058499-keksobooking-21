@@ -2,6 +2,9 @@
 
 (() => {
   const mainMap = document.querySelector(`.map`);
+  const cardTemplate = document.querySelector(`#card`)
+    .content
+    .querySelector(`.map__card`);
 
   const typeMap = {
     palace: `Дворец`,
@@ -9,9 +12,6 @@
     house: `Дом`,
     bungalow: `Бунгало`
   };
-  const cardTemplate = document.querySelector(`#card`)
-    .content
-    .querySelector(`.map__card`);
 
   let cardPopupRef = null;
 

@@ -24,10 +24,6 @@
   const getPrice = (multiplier) => Math.round(Math.random() * multiplier);
 
   const toggleAdFormElements = (nodes, flag) => {
-    // nodes.forEach((node) => {
-    //   node.disabled = !flag;
-    // });
-
     for (let i = 0; i < nodes.length; i++) {
       nodes[i].disabled = !flag;
     }
