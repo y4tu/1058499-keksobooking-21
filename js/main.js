@@ -1,35 +1,56 @@
 "use strict";
 
 (() => {
-  const ERROR_COLOR = `rgb(255, 86, 53)`;
-  const ERROR_TEXT_COLOR = `rgb(255, 255, 255)`;
-
   const mainMap = document.querySelector(`.map`);
   const mapMainPin = mainMap.querySelector(`.map__pin--main`);
+  const errorTemplate = document.querySelector(`#error`)
+    .content
+    .querySelector(`.error`);
 
-  let ads = [];
-
-  const getAds = (data) => {
-    data.forEach((item) => {
-      ads.push(item);
-    });
+  const onSuccess = (data) => {
+    window.pin.renderPins(data);
   };
 
-  const showErrorMessage = (errorMessage) => {
-    const node = document.createElement(`div`);
-    node.style = `z-index: 100; margin: 0 auto; text-align: center; color: ${ERROR_TEXT_COLOR}; background-color: ${ERROR_COLOR}`;
-    node.style.position = `absolute`;
-    node.style.left = 0;
-    node.style.right = 0;
-    node.style.fontSize = `30px`;
+  const onError = (errorMessage) => {
+    const fragment = document.createDocumentFragment();
 
-    node.textContent = errorMessage;
-    document.body.appendChild(node);
+    fragment.appendChild(errorTemplate.cloneNode(true));
+
+    const errorText = fragment.querySelector(`p`);
+    const retry = fragment.querySelector(`button`);
+
+    errorText.textContent = errorMessage;
+
+    document.body.appendChild(fragment);
+
+    const errorPopup = document.querySelector(`.error`);
+
+    const dropError = () => {
+      document.body.removeChild(errorPopup);
+      deactivatePage();
+      errorPopup.removeEventListener(`click`, onRetryClick);
+      document.removeEventListener(`keydown`, onEscKeydown);
+    };
+
+    const onRetryClick = (evt) => {
+      if (evt.target === retry && document.body.contains(errorPopup)) {
+        dropError();
+      }
+    };
+
+    const onEscKeydown = (evt) => {
+      if (evt.key === `Escape` && document.body.contains(errorPopup)) {
+        dropError();
+      }
+    };
+
+    errorPopup.addEventListener(`click`, onRetryClick);
+    document.addEventListener(`keydown`, onEscKeydown);
   };
 
-  const activatePage = (data) => {
+  const activatePage = () => {
 
-    getAds(data);
+    window.backend.download(onSuccess, onError);
 
     window.util.isPageActive = true;
 
@@ -46,28 +67,20 @@
     window.form.disableForm();
   };
 
-  const onPinMousedown = (data) => {
-    mapMainPin.addEventListener(`mousedown`, (evt) => {
-      if (evt.button === 0 && window.util.isPageActive !== true) {
-        activatePage(data);
-        window.pin.renderPins(ads);
-      }
-    });
-  };
+  mapMainPin.addEventListener(`mousedown`, (evt) => {
+    if (evt.button === 0 && window.util.isPageActive !== true) {
+      activatePage();
+    }
+  });
 
-  const onPinKeydownEnter = (data) => {
-    mapMainPin.addEventListener(`keydown`, (evt) => {
-      if (evt.key === `Enter` && window.util.isPageActive !== true) {
-        activatePage(data);
-        window.pin.renderPins(ads);
-      }
-    });
-  };
+  mapMainPin.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Enter` && window.util.isPageActive !== true) {
+      activatePage();
+    }
+  });
 
   deactivatePage();
 
-  window.exchange.download(onPinMousedown, showErrorMessage);
-  window.exchange.download(onPinKeydownEnter, showErrorMessage);
   window.dragAndDrop.moveElement(mapMainPin, mapMainPin);
 })();
 
