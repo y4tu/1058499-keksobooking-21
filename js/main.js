@@ -16,6 +16,7 @@
   };
 
   const onSuccessUpload = () => {
+    onReset();
     deactivatePage();
     window.messages.showSuccessMessage();
   };
@@ -25,8 +26,7 @@
     window.backend.upload(new FormData(adForm), onSuccessUpload, onError);
   };
 
-  const onReset = (evt) => {
-    evt.preventDefault();
+  const onReset = () => {
     adForm.reset();
     deactivatePage();
   };
@@ -66,9 +66,13 @@
 
   adForm.addEventListener(`submit`, onSubmit);
 
-  adFormReset.addEventListener(`click`, onReset);
+  adFormReset.addEventListener(`click`, (evt) => {
+    evt.preventDefault();
+    onReset();
+  });
 
   adFormReset.addEventListener(`keydown`, (evt) => {
+    evt.preventDefault();
     if (evt.key === `Enter`) {
       onReset(evt);
     }
