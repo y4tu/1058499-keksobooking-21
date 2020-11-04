@@ -44,8 +44,20 @@
     similarPins.appendChild(fragment);
   };
 
+  const removePins = () => {
+    const pins = document.querySelectorAll(`.map__pin`);
+    const mainPin = document.querySelector(`.map__pin--main`);
+
+    mainPin.style = `left: 570px; top: 375px;`;
+
+    for (let i = 1; i < pins.length; i++) {
+      similarPins.removeChild(pins[i]);
+    }
+  };
+
   window.pin = {
     createPin,
     renderPins,
+    removePins,
   };
 })();

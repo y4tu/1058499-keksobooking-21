@@ -102,6 +102,13 @@
     formInputRooms.reportValidity();
   };
 
+  const getData = () => {
+  };
+
+  const onSuccess = () => {
+
+  };
+
   formInputTitle.addEventListener(`change`, onTitleInput);
   formInputPrice.addEventListener(`change`, onPriceInput);
   formInputTimeIn.addEventListener(`change`, onCheckTimeChange);
