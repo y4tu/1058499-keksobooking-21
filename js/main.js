@@ -4,6 +4,7 @@
   const mainMap = document.querySelector(`.map`);
   const mapMainPin = mainMap.querySelector(`.map__pin--main`);
   const adForm = document.querySelector(`.ad-form`);
+  const adFormReset = document.querySelector(`.ad-form__reset`);
 
   const onSuccessDownload = (data) => {
     window.pin.renderPins(data);
@@ -22,6 +23,12 @@
   const onSubmit = (evt) => {
     evt.preventDefault();
     window.backend.upload(new FormData(adForm), onSuccessUpload, onError);
+  };
+
+  const onReset = (evt) => {
+    evt.preventDefault();
+    adForm.reset();
+    deactivatePage();
   };
 
   const activatePage = () => {
@@ -58,6 +65,14 @@
   });
 
   adForm.addEventListener(`submit`, onSubmit);
+
+  adFormReset.addEventListener(`click`, onReset);
+
+  adFormReset.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Enter`) {
+      onReset(evt);
+    }
+  });
 
   window.dragAndDrop.moveElement(mapMainPin, mapMainPin);
 })();
