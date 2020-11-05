@@ -1,6 +1,10 @@
 'use strict';
 
 (() => {
+  const MAP_PIN_MAIN_OFFSET_X = 65;
+  const MAP_PIN_MAIN_OFFSET_Y = 65;
+  const TAIL = 22;
+
   const Borders = {
     TOP: 130,
     BOTTOM: 630,
@@ -9,10 +13,10 @@
   };
 
   const limits = {
-    top: Math.floor(Borders.TOP - window.form.MAP_PIN_MAIN_OFFSET_Y / 2 - window.form.TAIL),
-    bottom: Math.floor(Borders.BOTTOM - window.form.MAP_PIN_MAIN_OFFSET_Y / 2 - window.form.TAIL),
-    left: Math.floor(Borders.LEFT - window.form.MAP_PIN_MAIN_OFFSET_X / 2),
-    right: Math.floor(Borders.RIGHT - window.form.MAP_PIN_MAIN_OFFSET_X / 2),
+    top: Math.floor(Borders.TOP - MAP_PIN_MAIN_OFFSET_Y / 2 - TAIL),
+    bottom: Math.floor(Borders.BOTTOM - MAP_PIN_MAIN_OFFSET_Y / 2 - TAIL),
+    left: Math.floor(Borders.LEFT - MAP_PIN_MAIN_OFFSET_X / 2),
+    right: Math.floor(Borders.RIGHT - MAP_PIN_MAIN_OFFSET_X / 2),
   };
 
   const moveElement = (targetElement, drivenElement) => {

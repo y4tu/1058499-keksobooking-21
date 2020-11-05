@@ -8,12 +8,7 @@
     OK: 200,
   };
 
-  const download = (onSuccess, onError) => {
-    const xhr = new XMLHttpRequest();
-    xhr.responseType = `json`;
-
-    xhr.open(`GET`, `${API_URL}/data`);
-
+  const getServerResponse = (xhr, onSuccess, onError) => {
     xhr.addEventListener(`load`, () => {
       if (xhr.status === StatusCode.OK) {
         onSuccess(xhr.response);
@@ -31,11 +26,32 @@
     });
 
     xhr.timeout = TIMEOUT_IN_MS;
+  };
 
+  const download = (onSuccess, onError) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.responseType = `json`;
+
+    getServerResponse(xhr, onSuccess, onError);
+
+    xhr.open(`GET`, `${API_URL}/data`);
     xhr.send();
+  };
+
+  const upload = (data, onSuccess, onError) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.responseType = `json`;
+
+    getServerResponse(xhr, onSuccess, onError);
+
+    xhr.open(`POST`, API_URL);
+    xhr.send(data);
   };
 
   window.backend = {
     download,
+    upload,
   };
 })();

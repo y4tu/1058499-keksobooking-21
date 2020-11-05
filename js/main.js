@@ -3,68 +3,50 @@
 (() => {
   const mainMap = document.querySelector(`.map`);
   const mapMainPin = mainMap.querySelector(`.map__pin--main`);
-  const errorTemplate = document.querySelector(`#error`)
-    .content
-    .querySelector(`.error`);
+  const adForm = document.querySelector(`.ad-form`);
+  const adFormReset = document.querySelector(`.ad-form__reset`);
 
-  const onSuccess = (data) => {
-    window.pin.renderPins(data);
+  const onSuccessDownload = (data) => {
+    const filteredData = window.filter.filterPinQantity(data);
+
+    window.pin.renderPins(filteredData);
   };
 
   const onError = (errorMessage) => {
-    const fragment = document.createDocumentFragment();
+    deactivatePage();
+    window.messages.showErrorMessage(errorMessage);
+  };
 
-    fragment.appendChild(errorTemplate.cloneNode(true));
+  const onSuccessUpload = () => {
+    onReset();
+    deactivatePage();
+    window.messages.showSuccessMessage();
+  };
 
-    const errorText = fragment.querySelector(`p`);
-    const retry = fragment.querySelector(`button`);
+  const onSubmit = (evt) => {
+    evt.preventDefault();
+    if (adForm.checkValidity() === true) {
+      window.backend.upload(new FormData(adForm), onSuccessUpload, onError);
+    }
+  };
 
-    errorText.textContent = errorMessage;
-
-    document.body.appendChild(fragment);
-
-    const errorPopup = document.querySelector(`.error`);
-
-    const dropError = () => {
-      document.body.removeChild(errorPopup);
-      deactivatePage();
-      errorPopup.removeEventListener(`click`, onRetryClick);
-      document.removeEventListener(`keydown`, onEscKeydown);
-    };
-
-    const onRetryClick = (evt) => {
-      if (evt.target === retry && document.body.contains(errorPopup)) {
-        dropError();
-      }
-    };
-
-    const onEscKeydown = (evt) => {
-      if (evt.key === `Escape` && document.body.contains(errorPopup)) {
-        dropError();
-      }
-    };
-
-    errorPopup.addEventListener(`click`, onRetryClick);
-    document.addEventListener(`keydown`, onEscKeydown);
+  const onReset = () => {
+    adForm.reset();
+    deactivatePage();
   };
 
   const activatePage = () => {
-
-    window.backend.download(onSuccess, onError);
-
     window.util.isPageActive = true;
-
     mainMap.classList.remove(`map--faded`);
-
     window.form.enableForm();
+    window.backend.download(onSuccessDownload, onError);
   };
 
   const deactivatePage = () => {
     window.util.isPageActive = false;
-
     mainMap.classList.add(`map--faded`);
-
     window.form.disableForm();
+    window.pin.removePins();
   };
 
   mapMainPin.addEventListener(`mousedown`, (evt) => {
@@ -76,6 +58,20 @@
   mapMainPin.addEventListener(`keydown`, (evt) => {
     if (evt.key === `Enter` && window.util.isPageActive !== true) {
       activatePage();
+    }
+  });
+
+  adForm.addEventListener(`submit`, onSubmit);
+
+  adFormReset.addEventListener(`click`, (evt) => {
+    evt.preventDefault();
+    onReset();
+  });
+
+  adFormReset.addEventListener(`keydown`, (evt) => {
+    evt.preventDefault();
+    if (evt.key === `Enter`) {
+      onReset(evt);
     }
   });
 
