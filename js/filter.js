@@ -5,22 +5,19 @@
   const mapFilters = mainMap.querySelector(`.map__filters`);
   const housingType = mapFilters.querySelector(`#housing-type`);
 
-  // const filterType = (data) => {
-  //   data.filter(item => item.offer.type.value);
-  // };
-  //
-  //
-  //
-  //
-  // const filterFunction = (array, property, propertyValue) => {
-  //   array.forEach((item) => {
-  //     if
-  //   })
-  //
-  //   if (property !== `any` && property === propertyValue) {
-  //     array.filter(() => property === propertyValue);
-  //   }
-  // };
+  const filterType = (data, type) => {
+    let array = [];
+
+    if (type !== `any`) {
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].offer.type === type) {
+          array.push(data[i]);
+        }
+      }
+    }
+
+    return array;
+  };
 
   const filterPinQantity = (array) => {
     return array.slice(0, 5);
@@ -30,6 +27,6 @@
     mapFilters,
     housingType,
     filterPinQantity,
-    // filterType,
+    filterType,
   };
 })();
