@@ -7,7 +7,9 @@
   const adFormReset = document.querySelector(`.ad-form__reset`);
 
   const onSuccessDownload = (data) => {
-    window.pin.renderPins(data);
+    const filteredData = window.filter.filterPinQantity(data);
+
+    window.pin.renderPins(filteredData);
   };
 
   const onError = (errorMessage) => {
@@ -23,7 +25,9 @@
 
   const onSubmit = (evt) => {
     evt.preventDefault();
-    window.backend.upload(new FormData(adForm), onSuccessUpload, onError);
+    if (adForm.checkValidity() === true) {
+      window.backend.upload(new FormData(adForm), onSuccessUpload, onError);
+    }
   };
 
   const onReset = () => {
@@ -32,24 +36,17 @@
   };
 
   const activatePage = () => {
-
-    window.backend.download(onSuccessDownload, onError);
-
     window.util.isPageActive = true;
-
     mainMap.classList.remove(`map--faded`);
-
     window.form.enableForm();
+    window.backend.download(onSuccessDownload, onError);
   };
 
   const deactivatePage = () => {
-    window.pin.removePins();
-
     window.util.isPageActive = false;
-
     mainMap.classList.add(`map--faded`);
-
     window.form.disableForm();
+    window.pin.removePins();
   };
 
   mapMainPin.addEventListener(`mousedown`, (evt) => {
@@ -77,6 +74,8 @@
       onReset(evt);
     }
   });
+
+  deactivatePage();
 
   window.dragAndDrop.moveElement(mapMainPin, mapMainPin);
 })();

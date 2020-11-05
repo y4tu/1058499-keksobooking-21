@@ -44,6 +44,8 @@
   const enableForm = () => {
     adForm.classList.remove(`ad-form--disabled`);
 
+    calcAdAddress(parseInt(mapPinMain.style.left, 10), parseInt(mapPinMain.style.top, 10));
+
     window.util.toggleAdFormElements(selects, window.util.isPageActive);
     window.util.toggleAdFormElements(inputs, window.util.isPageActive);
 
@@ -102,27 +104,20 @@
     formInputRooms.reportValidity();
   };
 
-  const getData = () => {
-  };
-
-  const onSuccess = () => {
-
-  };
-
   formInputTitle.addEventListener(`change`, onTitleInput);
   formInputPrice.addEventListener(`change`, onPriceInput);
   formInputTimeIn.addEventListener(`change`, onCheckTimeChange);
   formInputTimeOut.addEventListener(`change`, onCheckTimeChange);
   formInputRooms.addEventListener(`change`, onRoomsInput);
   formInputCapacity.addEventListener(`change`, onRoomsInput);
+  adForm.addEventListener(`submit`, onRoomsInput);
 
   window.form = {
     formInputAddress,
-    MAP_PIN_MAIN_OFFSET_X,
-    MAP_PIN_MAIN_OFFSET_Y,
-    TAIL,
+    formInputRooms,
     calcAdAddress,
     enableForm,
     disableForm,
+    onRoomsInput,
   };
 })();
