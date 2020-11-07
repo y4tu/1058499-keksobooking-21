@@ -1,6 +1,10 @@
 'use strict';
 
 (() => {
+  const DefaultMainPinCoords = {
+    LEFT: `570px`,
+    TOP: `375px`,
+  }
   const mainMap = document.querySelector(`.map`);
   const similarPins = mainMap.querySelector(`.map__pins`);
   const mapFiltersContainer = mainMap.querySelector(`.map__filters-container`);
@@ -37,6 +41,9 @@
   };
 
   const renderPins = (array) => {
+    window.card.removeCard();
+    removePins();
+
     const fragment = document.createDocumentFragment();
 
     array.forEach((item) => fragment.appendChild(window.pin.createPin(item)));
@@ -48,7 +55,7 @@
     const pins = document.querySelectorAll(`.map__pin`);
     const mainPin = document.querySelector(`.map__pin--main`);
 
-    mainPin.style = `left: 570px; top: 375px;`;
+    mainPin.style = `left: ${DefaultMainPinCoords.LEFT}; top: ${DefaultMainPinCoords.TOP};`;
 
     for (let i = 1; i < pins.length; i++) {
       similarPins.removeChild(pins[i]);
