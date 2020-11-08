@@ -28,11 +28,11 @@ const filterPrice = (ad) => {
     case Conditions.ANY:
       return true;
     case Conditions.LOW:
-      return +ad.offer.price < Prices.LOW;
+      return ad.offer.price < Prices.LOW;
     case Conditions.MIDDLE:
-      return +ad.offer.price <= Prices.HIGH && ad.offer.price >= Prices.LOW;
+      return ad.offer.price <= Prices.HIGH && ad.offer.price >= Prices.LOW;
     case Conditions.HIGH:
-      return +ad.offer.price > Prices.HIGH;
+      return ad.offer.price > Prices.HIGH;
   }
 
   return false;
