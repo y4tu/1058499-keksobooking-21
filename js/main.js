@@ -38,6 +38,8 @@
 
   const onReset = () => {
     adForm.reset();
+    window.photos.resetAvatar();
+    window.photos.resetPhotoPreview();
     deactivatePage();
   };
 
