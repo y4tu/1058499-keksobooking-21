@@ -31,10 +31,12 @@ const priceMap = {
   palace: 10000,
 };
 
+let isPageActive = false;
+
 const calcAdAddress = (xCoord, yCoord) => {
   const x = Math.round(xCoord + MAP_PIN_MAIN_OFFSET_X / 2);
 
-  const y = Math.round(window.util.isPageActive ?
+  const y = Math.round(isPageActive ?
     yCoord + MAP_PIN_MAIN_OFFSET_Y / 2 + TAIL :
     yCoord + MAP_PIN_MAIN_OFFSET_Y / 2);
 
@@ -42,25 +44,29 @@ const calcAdAddress = (xCoord, yCoord) => {
 };
 
 const enableForm = () => {
+  isPageActive = true;
+
   adForm.classList.remove(`ad-form--disabled`);
 
   calcAdAddress(parseInt(mapPinMain.style.left, 10), parseInt(mapPinMain.style.top, 10));
 
-  window.util.toggleAdFormElements(selects, window.util.isPageActive);
-  window.util.toggleAdFormElements(inputs, window.util.isPageActive);
+  window.util.toggleAdFormElements(selects, isPageActive);
+  window.util.toggleAdFormElements(inputs, isPageActive);
 
-  textarea.disabled = !window.util.isPageActive;
+  textarea.disabled = !isPageActive;
 };
 
 const disableForm = () => {
+  isPageActive = false;
+
   adForm.classList.add(`ad-form--disabled`);
 
   calcAdAddress(parseInt(mapPinMain.style.left, 10), parseInt(mapPinMain.style.top, 10));
 
-  window.util.toggleAdFormElements(selects, window.util.isPageActive);
-  window.util.toggleAdFormElements(inputs, window.util.isPageActive);
+  window.util.toggleAdFormElements(selects, isPageActive);
+  window.util.toggleAdFormElements(inputs, isPageActive);
 
-  textarea.disabled = !window.util.isPageActive;
+  textarea.disabled = !isPageActive;
 };
 
 const onTitleInput = (evt) => {
@@ -114,6 +120,7 @@ formInputCapacity.addEventListener(`change`, onRoomsInput);
 adForm.addEventListener(`submit`, onRoomsInput);
 
 window.form = {
+  isPageActive,
   calcAdAddress,
   enableForm,
   disableForm,

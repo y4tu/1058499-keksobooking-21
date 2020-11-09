@@ -81,7 +81,7 @@ const onFilterChange = () => {
   window.pin.render(filteredData);
 };
 
-mapFilters.addEventListener(`change`, window.debounce.execute(onFilterChange));
+mapFilters.addEventListener(`change`, window.util.debounce(onFilterChange));
 
 window.filter = {
   getOffers,

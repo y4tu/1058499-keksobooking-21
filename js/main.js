@@ -44,14 +44,14 @@ const onReset = () => {
 };
 
 const activatePage = () => {
-  window.util.isPageActive = true;
+  window.form.isPageActive = true;
   mainMap.classList.remove(`map--faded`);
   window.backend.download(onSuccessDownload, onError);
   window.form.enableForm();
 };
 
 const deactivatePage = () => {
-  window.util.isPageActive = false;
+  window.form.isPageActive = false;
   mainMap.classList.add(`map--faded`);
   window.pin.remove();
   window.card.remove();
@@ -59,13 +59,13 @@ const deactivatePage = () => {
 };
 
 mapMainPin.addEventListener(`mousedown`, (evt) => {
-  if (evt.button === 0 && window.util.isPageActive !== true) {
+  if (evt.button === 0 && window.form.isPageActive !== true) {
     activatePage();
   }
 });
 
 mapMainPin.addEventListener(`keydown`, (evt) => {
-  if (evt.key === `Enter` && window.util.isPageActive !== true) {
+  if (evt.key === `Enter` && window.form.isPageActive !== true) {
     activatePage();
   }
 });

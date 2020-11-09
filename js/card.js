@@ -14,7 +14,7 @@ const typeMap = {
 
 let cardPopupRef = null;
 
-const create = (ad) => {
+const createCard = (ad) => {
   const {author, offer} = ad;
   const {avatar} = author;
 
@@ -71,7 +71,7 @@ const create = (ad) => {
     photosElement.append(photoItem);
   }
 
-  closeElement.addEventListener(`click`, remove);
+  closeElement.addEventListener(`click`, removeCard);
   document.addEventListener(`keydown`, onEscKeydown);
 
   cardPopupRef = cardElement;
@@ -80,7 +80,7 @@ const create = (ad) => {
     const children = cardElement.childNodes;
 
     Array.from(children).forEach((item) => {
-      if (item.textContent === `` && item.tagName !== `IMG`) {
+      if (item.textContent === `` && item.tagName !== `IMG` && !item.hasChildNodes()) {
         cardElement.removeChild(item);
       }
     });
@@ -89,7 +89,7 @@ const create = (ad) => {
   return cardElement;
 };
 
-const remove = () => {
+const removeCard = () => {
   if (cardPopupRef) {
     mainMap.removeChild(cardPopupRef);
     cardPopupRef = null;
@@ -100,11 +100,11 @@ const remove = () => {
 
 const onEscKeydown = (evt) => {
   if (evt.key === `Escape`) {
-    remove();
+    removeCard();
   }
 };
 
 window.card = {
-  create,
-  remove,
+  create: createCard,
+  remove: removeCard,
 };

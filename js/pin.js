@@ -11,8 +11,6 @@ const mapPinTemplate = document.querySelector(`#pin`)
     .content
     .querySelector(`.map__pin`);
 
-let currentPinElement = null;
-
 const dropActiveClass = () => {
   const mapPinElements = similarPins.querySelectorAll(`.map__pin`);
 
@@ -23,11 +21,9 @@ const dropActiveClass = () => {
   });
 };
 
-const create = (ad) => {
+const createPin = (ad) => {
   const pinElement = mapPinTemplate.cloneNode(true);
   const image = pinElement.querySelector(`img`);
-
-  currentPinElement = pinElement;
 
   image.src = ad.author.avatar;
   image.alt = ad.offer.title;
@@ -61,18 +57,18 @@ const create = (ad) => {
   return pinElement;
 };
 
-const render = (array) => {
+const renderPin = (array) => {
   window.card.remove();
-  remove();
+  removePin();
 
   const fragment = document.createDocumentFragment();
 
-  array.forEach((item) => fragment.appendChild(create(item)));
+  array.forEach((item) => fragment.appendChild(createPin(item)));
 
   similarPins.appendChild(fragment);
 };
 
-const remove = () => {
+const removePin = () => {
   const pins = document.querySelectorAll(`.map__pin`);
   const mainPin = document.querySelector(`.map__pin--main`);
 
@@ -85,7 +81,7 @@ const remove = () => {
 
 window.pin = {
   dropActiveClass,
-  create,
-  render,
-  remove,
+  create: createPin,
+  render: renderPin,
+  remove: removePin,
 };
