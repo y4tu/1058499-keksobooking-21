@@ -79,7 +79,7 @@ const create = (ad) => {
   if (cardElement.hasChildNodes()) {
     const children = cardElement.childNodes;
 
-    for (let i = 0; i < children.length; i++) {
+    for (let i = 2; i < children.length; i++) {
       if (children[i].textContent === ``) {
         cardElement.removeChild(children[i]);
       }
