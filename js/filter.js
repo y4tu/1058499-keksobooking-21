@@ -57,7 +57,7 @@ const filterFeatures = (ad) => {
 const getOffers = (array) => {
   const filteredData = [];
 
-  for (let i = 0; i < MAX_RENDERED_PINS; i++) {
+  for (let i = 0; i < array.length && filteredData.length < MAX_RENDERED_PINS; i++) {
     if (filterType(array[i]) &&
         filterPrice(array[i]) &&
         filterRooms(array[i]) &&
