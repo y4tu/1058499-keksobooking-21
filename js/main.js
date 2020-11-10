@@ -40,7 +40,7 @@ const onReset = () => {
   mapFilters.reset();
   window.photos.resetAvatar();
   window.photos.resetImagePreview();
-  window.form.onTypeChange();
+  window.form.onTypeInput();
   window.form.onRoomsInput();
   deactivatePage();
 };

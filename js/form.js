@@ -69,7 +69,7 @@ const disableForm = () => {
   textarea.disabled = !isPageActive;
 };
 
-const onTypeChange = () => {
+const onTypeInput = () => {
   formInputPrice.placeholder = priceMap[formInputType.value];
   formInputPrice.min = priceMap[formInputType.value];
   formInputPrice.max = MAX_HOUSING_PRICE;
@@ -116,7 +116,7 @@ const onRoomsInput = () => {
   formInputRooms.reportValidity();
 };
 
-formInputType.addEventListener(`change`, onTypeChange);
+formInputType.addEventListener(`change`, onTypeInput);
 formInputTitle.addEventListener(`change`, onTitleInput);
 formInputPrice.addEventListener(`change`, onPriceInput);
 formInputTimeIn.addEventListener(`change`, onCheckTimeChange);
@@ -130,6 +130,6 @@ window.form = {
   calcAdAddress,
   enableForm,
   disableForm,
-  onTypeChange,
+  onTypeInput,
   onRoomsInput,
 };
