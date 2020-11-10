@@ -69,6 +69,12 @@ const disableForm = () => {
   textarea.disabled = !isPageActive;
 };
 
+const onTypeChange = () => {
+  formInputPrice.placeholder = priceMap[formInputType.value];
+  formInputPrice.min = priceMap[formInputType.value];
+  formInputPrice.max = MAX_HOUSING_PRICE;
+};
+
 const onTitleInput = (evt) => {
   if (evt.target.value.length === 0) {
     formInputTitle.setCustomValidity(`Введите заголовок!`);
@@ -84,7 +90,6 @@ const onTitleInput = (evt) => {
 const onPriceInput = () => {
   formInputPrice.min = priceMap[formInputType.value];
   formInputPrice.max = MAX_HOUSING_PRICE;
-  formInputPrice.placeholder = priceMap[formInputType.value];
 
   if (formInputPrice.value < +formInputPrice.min || formInputPrice.value > +formInputPrice.max) {
     formInputPrice.setCustomValidity(`От ${formInputPrice.min} до ${formInputPrice.max}`);
@@ -111,6 +116,7 @@ const onRoomsInput = () => {
   formInputRooms.reportValidity();
 };
 
+formInputType.addEventListener(`change`, onTypeChange);
 formInputTitle.addEventListener(`change`, onTitleInput);
 formInputPrice.addEventListener(`change`, onPriceInput);
 formInputTimeIn.addEventListener(`change`, onCheckTimeChange);
@@ -124,5 +130,6 @@ window.form = {
   calcAdAddress,
   enableForm,
   disableForm,
+  onTypeChange,
   onRoomsInput,
 };

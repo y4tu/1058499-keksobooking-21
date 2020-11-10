@@ -40,6 +40,8 @@ const onReset = () => {
   mapFilters.reset();
   window.photos.resetAvatar();
   window.photos.resetImagePreview();
+  window.form.onTypeChange();
+  window.form.onRoomsInput();
   deactivatePage();
 };
 
@@ -88,7 +90,7 @@ adFormFilters.addEventListener(`click`, (evt) => {
   target = evt.target;
 });
 
-deactivatePage();
+onReset();
 
 window.dragAndDrop.moveElement(mapMainPin, mapMainPin);
 

@@ -57,21 +57,21 @@ const createCard = (ad) => {
   featuresElement.innerHTML = ``;
   photosElement.innerHTML = ``;
 
-  for (let i = 0; i < features.length; i++) {
+  features.forEach((item) => {
     const featureItem = document.createElement(`li`);
 
-    featureItem.classList.add(`popup__feature`, `popup__feature--${features[i]}`);
+    featureItem.classList.add(`popup__feature`, `popup__feature--${item}`);
 
     featuresElement.append(featureItem);
-  }
+  });
 
-  for (let i = 0; i < photos.length; i++) {
+  photos.forEach((item) => {
     const photoItem = photoElement.cloneNode();
-    photoItem.src = `${photos[i]}`;
+    photoItem.src = `${item}`;
     photosElement.append(photoItem);
-  }
+  });
 
-  closeElement.addEventListener(`click`, removeCard);
+  closeElement.addEventListener(`click`, onCardRemove);
   document.addEventListener(`keydown`, onEscKeydown);
 
   cardPopupRef = cardElement;
@@ -89,7 +89,7 @@ const createCard = (ad) => {
   return cardElement;
 };
 
-const removeCard = () => {
+const onCardRemove = () => {
   if (cardPopupRef) {
     mainMap.removeChild(cardPopupRef);
     cardPopupRef = null;
@@ -100,11 +100,11 @@ const removeCard = () => {
 
 const onEscKeydown = (evt) => {
   if (evt.key === `Escape`) {
-    removeCard();
+    onCardRemove();
   }
 };
 
 window.card = {
   create: createCard,
-  remove: removeCard,
+  remove: onCardRemove,
 };

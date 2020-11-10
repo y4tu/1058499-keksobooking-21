@@ -56,20 +56,14 @@ const filterFeatures = (ad) => {
 
 const getOffers = (array) => {
   const filteredData = [];
-  let counter = 0;
 
-  for (let i = 0; i < array.length; i++) {
-    counter++;
-
+  for (let i = 0; i < MAX_RENDERED_PINS; i++) {
     if (filterType(array[i]) &&
         filterPrice(array[i]) &&
         filterRooms(array[i]) &&
         filterGuests(array[i]) &&
         filterFeatures(array[i])) {
       filteredData.push(array[i]);
-    }
-    if (counter === MAX_RENDERED_PINS) {
-      break;
     }
   }
 
